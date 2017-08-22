@@ -757,7 +757,7 @@
       <workItem from="1502350766736" duration="4002000" />
       <workItem from="1503284754805" duration="3655000" />
       <workItem from="1503297633524" duration="40000" />
-      <workItem from="1503298276467" duration="11279000" />
+      <workItem from="1503298276467" duration="11853000" />
     </task>
     <servers />
   </component>
@@ -794,11 +794,11 @@
     </history-entry>
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="19252000" />
+    <option name="totallyTimeSpent" value="19826000" />
   </component>
   <component name="ToolWindowManager">
     <frame x="-8" y="-8" width="1382" height="744" extended-state="6" />
-    <editor active="true" />
+    <editor active="false" />
     <layout>
       <window_info id="Palette" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="Nl-Palette" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
