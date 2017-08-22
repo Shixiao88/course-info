@@ -26,12 +26,16 @@ public class Tuple implements Serializable {
      */
     public Tuple(TupleDesc td) {
         this.td = td;
-        this.num = td.getSize();
+        this.num = td.numFields();
         ArrayList<Field> fds = new ArrayList<>();
         for (int i = 0; i < num; i += 1) {
-            fds.add(td.)
+            if (td.getFieldType(i) == Type.INT_TYPE) {
+                fds.add(new IntField(0));
+            } else {
+                fds.add(new StringField("", 0));
+            }
         }
-        this.fields = (Field[]) new Object[num];
+        this.fields = fds.toArray(new Field[1]);
     }
 
     /**
