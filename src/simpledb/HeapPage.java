@@ -22,6 +22,8 @@ public class HeapPage implements Page {
     byte[] oldData;
     private final Byte oldDataLock=new Byte((byte)0);
 
+    private int realTupleNum;
+
     /**
      * Create a HeapPage from a set of bytes of data read from disk.
      * The format of a HeapPage is a set of header bytes indicating
@@ -46,18 +48,29 @@ public class HeapPage implements Page {
 
         // allocate and read the header slots of this page
         header = new byte[getHeaderSize()];
-        for (int i=0; i<header.length; i++)
+        for (int i=0; i<header.length; i++) {
             header[i] = dis.readByte();
-        
+        }
         tuples = new Tuple[numSlots];
+
+        int reallines = 0;
         try{
+
             // allocate and read the actual records of this page
-            for (int i=0; i<tuples.length; i++)
-                tuples[i] = readNextTuple(dis,i);
-        }catch(NoSuchElementException e){
+            for (int i=0; i<tuples.length; i++) {
+                Tuple t = readNextTuple(dis, i);
+                if (t != null) {
+                    tuples[i] = t;
+                    reallines += 1;
+                } else {
+                    break;
+                }
+            }
+        } catch(NoSuchElementException e){
             e.printStackTrace();
         }
         dis.close();
+        realTupleNum = reallines;
 
         setBeforeImage();
     }
@@ -65,21 +78,16 @@ public class HeapPage implements Page {
     /** Retrieve the number of tuples on this page.
         @return the number of tuples on this page
     */
-    private int getNumTuples() {        
-        // some code goes here
-        return 0;
-
+    private int getNumTuples() {
+        return (int)(Math.floor(BufferPool.getPageSize() * 8 / (td.getSize() * 8 + 1)));
     }
 
     /**
      * Computes the number of bytes in the header of a page in a HeapFile with each tuple occupying tupleSize bytes
      * @return the number of bytes in the header of a page in a HeapFile with each tuple occupying tupleSize bytes
      */
-    private int getHeaderSize() {        
-        
-        // some code goes here
-        return 0;
-                 
+    private int getHeaderSize() {
+        return (int)(Math.ceil(getNumTuples() / 8));
     }
     
     /** Return a view of this page before it was modified
@@ -111,8 +119,7 @@ public class HeapPage implements Page {
      * @return the PageId associated with this page.
      */
     public HeapPageId getId() {
-    // some code goes here
-    throw new UnsupportedOperationException("implement this");
+        return pid;
     }
 
     /**
@@ -281,16 +288,24 @@ public class HeapPage implements Page {
      * Returns the number of empty slots on this page.
      */
     public int getNumEmptySlots() {
-        // some code goes here
-        return 0;
+        int counter = 0;
+        int num = getHeaderSize();
+        for (int i = 0; i < num; i += 1) {
+            for (int j = 0; j < 8; j += 1) {
+                counter += ((header[i] >>> j) & 0x1);
+            }
+        }
+        return (numSlots - counter);
     }
 
     /**
      * Returns true if associated slot on this page is filled.
      */
     public boolean isSlotUsed(int i) {
-        // some code goes here
-        return false;
+        int byteIndex = i / 8;
+        int offset = i % 8;
+        byte b = 0x1;
+        return (((header[byteIndex] >> offset) & b) == 1);
     }
 
     /**
@@ -306,9 +321,28 @@ public class HeapPage implements Page {
      * (note that this iterator shouldn't return tuples in empty slots!)
      */
     public Iterator<Tuple> iterator() {
-        // some code goes here
-        return null;
+        return new TIterator();
     }
+
+   private class TIterator<Tuple> implements Iterator {
+        int index;
+
+        public TIterator() {
+            index = 0;
+        }
+
+        @Override
+        public boolean hasNext() {
+            return index < realTupleNum;
+        }
+
+        @Override
+        public Tuple next() {
+            Tuple t = (Tuple)tuples[index];
+            index += 1;
+            return t;
+        }
+   }
 
 }
 

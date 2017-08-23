@@ -27,6 +27,7 @@ public class Tuple implements Serializable {
     public Tuple(TupleDesc td) {
         this.td = td;
         this.num = td.numFields();
+        this.fields = new Field[num];
         ArrayList<Field> fds = new ArrayList<>();
         for (int i = 0; i < num; i += 1) {
             if (td.getFieldType(i) == Type.INT_TYPE) {
@@ -106,7 +107,7 @@ public class Tuple implements Serializable {
             s += fields[i].toString();
             s += "\t";
         }
-        s += fields[num].toString();
+        s += fields[num-1].toString();
         s += "\n";
         return s;
     }

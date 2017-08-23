@@ -2,6 +2,7 @@ package simpledb;
 
 import java.io.*;
 
+import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -25,17 +26,16 @@ public class BufferPool {
     constructor instead. */
     public static final int DEFAULT_PAGES = 50;
 
-    private Page[] pageArry ;
-    private int page_num;
+    private ArrayList<Page> pageList ;
+    private int max_page_num;
     /**
      * Creates a BufferPool that caches up to numPages pages.
      *
      * @param numPages maximum number of pages in this buffer pool.
      */
     public BufferPool(int numPages) {
-
-        pageArry = (Page[]) new Object[numPages];
-        page_num = numPages;
+        pageList = new ArrayList<>();
+        max_page_num = numPages;
     }
     
     public static int getPageSize() {
@@ -59,9 +59,9 @@ public class BufferPool {
      */
     public  Page getPage(TransactionId tid, PageId pid, Permissions perm)
         throws TransactionAbortedException, DbException {
-        for (int i = 0; i < page_num; i += 1) {
-            if (pageArry[i] == null && pageArry[i].getId() == pid) {
-                return pageArry[i];
+        for (Page pg : pageList) {
+            if (pg.getId() == pid) {
+                return pg;
             }
         }
         return null;

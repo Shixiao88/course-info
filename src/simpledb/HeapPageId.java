@@ -27,8 +27,7 @@ public class HeapPageId implements PageId {
      *   this PageId
      */
     public int pageNumber() {
-        // some code goes here
-        return 0;
+        return pageid;
     }
 
     /**
@@ -38,8 +37,8 @@ public class HeapPageId implements PageId {
      * @see BufferPool
      */
     public int hashCode() {
-        // some code goes here
-        throw new UnsupportedOperationException("implement this");
+        int hash = tableid * 37 + pageid;
+        return hash;
     }
 
     /**
@@ -50,8 +49,9 @@ public class HeapPageId implements PageId {
      *   ids are the same)
      */
     public boolean equals(Object o) {
-        // some code goes here
-        return false;
+        if (o == null) return false;
+        else if (!(o instanceof PageId)) return false;
+        return (((PageId)o).getTableId() == tableid && ((PageId)o).pageNumber() == pageid);
     }
 
     /**
