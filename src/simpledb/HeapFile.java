@@ -1,6 +1,9 @@
 package simpledb;
 
+import org.omg.SendingContext.RunTime;
+
 import java.io.*;
+import java.lang.reflect.Array;
 import java.util.*;
 
 /**
@@ -18,6 +21,8 @@ public class HeapFile implements DbFile {
     private final File file;
     private final TupleDesc td;
     private final int fileId;
+    private HeapPage[] hps;
+    private int pno;
 
     /**
      * Constructs a heap file backed by the specified file.
@@ -30,6 +35,30 @@ public class HeapFile implements DbFile {
         this.file = f;
         this.td = td;
         this.fileId = f.getAbsoluteFile().hashCode();
+        Database.getCatalog().addTable(this);
+        int pageSize = BufferPool.getPageSize();
+        int pageNum = (int)Math.floor((int) file.length()) / (pageSize);
+        byte[] pageBytes = new byte[pageSize];
+        ArrayList<HeapPage> hpLst = new ArrayList<>();
+        pno = 0;
+        int start = 0;
+        int diff = pageSize;
+        for (int i = 0; i < pageNum; i += 1) {
+            try {
+                BufferedInputStream buf = new BufferedInputStream(new FileInputStream(f));
+                buf.read(pageBytes, start, pageSize);
+                hpLst.add(new HeapPage(new HeapPageId(fileId, pno), pageBytes));
+                pageBytes = new byte[pageSize];
+                start += diff;
+                pno += 1;
+            } catch (FileNotFoundException e) {
+                e.printStackTrace();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+        hps = new HeapPage[pageNum];
+        hps = hpLst.toArray(new HeapPage[1]);
     }
 
     /**
@@ -65,7 +94,11 @@ public class HeapFile implements DbFile {
 
     // see DbFile.java for javadocs
     public Page readPage(PageId pid) {
-        return ;
+        int pno = pid.pageNumber();
+        if (hps[pno] == null) {
+           throw new IllegalArgumentException();
+        }
+        return hps[pno];
     }
 
     // see DbFile.java for javadocs
@@ -78,8 +111,7 @@ public class HeapFile implements DbFile {
      * Returns the number of pages in this HeapFile.
      */
     public int numPages() {
-        // some code goes here
-        return 0;
+        return pno;
     }
 
     // see DbFile.java for javadocs
@@ -100,9 +132,33 @@ public class HeapFile implements DbFile {
 
     // see DbFile.java for javadocs
     public DbFileIterator iterator(TransactionId tid) {
-        // some code goes here
-        return null;
+        return new DbFileIter(tid, fileId);
     }
+
+    private class DBFIterator<Tuple> implements Iterator{
+        private int pageIndexInThisFile;
+        private TransactionId tid;
+        private HeapPageId pid;
+
+        public DBFIterator(TransactionId tid) {
+            this.tid = tid;
+            pageIndexInThisFile = 0;
+            pid = new HeapPageId(fileId, pageIndexInThisFile);
+        }
+
+        @Override
+        public boolean hasNext() {
+            return pageIndexInThisFile < pno;
+        }
+
+        @Override
+        public Tuple next() {
+            try{
+                Tuple t = Database.getBufferPool().getPage(tid, pid, Permissions.READ_WRITE);
+                pageIndexInThisFile += 1;
+                pid = new HeapPageId(tid, pageIndexInThisFile);
+            } catch ()
+        }
 
 }
 

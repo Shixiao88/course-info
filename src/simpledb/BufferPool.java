@@ -64,7 +64,17 @@ public class BufferPool {
                 return pg;
             }
         }
-        return null;
+        HeapFile hp = (HeapFile)Database.getCatalog().getDatabaseFile(pid.getTableId());
+        Page noExistPage = hp.readPage(pid);
+        if (pageList.size() < max_page_num) {
+            pageList.add(noExistPage);
+            return noExistPage;
+        } else {
+            /*Eviction Policy afterwards */
+            throw new DbException("right now do not have eviction policy, buffer full. ");
+        }
+
+
     }
 
     /**
