@@ -1,5 +1,11 @@
 package simpledb;
 
+import org.omg.CORBA.TRANSACTION_MODE;
+
+import javax.xml.crypto.Data;
+import java.util.Iterator;
+import java.util.NoSuchElementException;
+
 /**
  * Created by Xiao Shi on 2017/8/24.
  */
@@ -10,11 +16,23 @@ public class DbFileIter implements DbFileIterator {
     private int fileId;
     private HeapPageId pid;
     private boolean isOpened = false;
+    private Iterator<Tuple> iter;
     private HeapFile f;
+    private HeapPageId initialId;
 
-    public DbFileIter(TransactionId tid, int tableId) {
-        this.tid = tid;
-        this.fileId = tableId;
+    public DbFileIter(TransactionId tid, int tableId)
+            throws DbException, TransactionAbortedException {
+        try {
+            this.tid = tid;
+            this.fileId = tableId;
+            pageIndexInThisFile = 0;
+            pid = new HeapPageId(fileId, pageIndexInThisFile);
+            initialId = new HeapPageId(fileId, 0);
+            f = (HeapFile) Database.getCatalog().getDatabaseFile(fileId);
+            iter = ((HeapPage) Database.getBufferPool().getPage(tid, pid, Permissions.READ_ONLY)).iterator();
+        } catch (TransactionAbortedException | DbException e) {
+            e.printStackTrace();
+        }
     }
 
     /**
@@ -24,22 +42,19 @@ public class DbFileIter implements DbFileIterator {
     @Override
     public void open()
         throws DbException, TransactionAbortedException {
-        try {
             isOpened = true;
-            pageIndexInThisFile = 0;
-            pid = new HeapPageId(fileId, pageIndexInThisFile);
-            f = (HeapFile)Database.getCatalog().getDatabaseFile(fid);
-        } catch (TransactionAbortedException e) {
-            e.printStackTrace();
-        } catch (DbException e) {
-            e.printStackTrace();
-        }
     }
 
     /** @return true if there are more tuples available. */
     public boolean hasNext()
         throws DbException, TransactionAbortedException {
-        return pageIndexInThisFile < f.numPages();
+        // if there is no page in the file and in the file there is no more tuple to iterate.
+        // then it has no next value
+        if (!isOpened) { return false;}
+        boolean s = (pageIndexInThisFile < f.numPages());
+        boolean b = iter.hasNext();
+        if (iter.hasNext()) { return true;}
+        else { return ++pageIndexInThisFile < f.numPages();}
     }
 
     /**
@@ -52,20 +67,45 @@ public class DbFileIter implements DbFileIterator {
     @Override
     public Tuple next()
         throws DbException, TransactionAbortedException, NoSuchElementException {
-        pageIndexInThisFile ++;
-        pid = new HeapPageId(fileId, pageIndexInThisFile);
-        return Database.getBufferPool().getPage(tid, pid, Permissions.READ_WRITE);
+        if (isOpened) {
+            try {
+                if (iter.hasNext()) {
+                    return iter.next();
+                }
+                pageIndexInThisFile++;
+                pid = new HeapPageId(fileId, pageIndexInThisFile);
+                iter = ((HeapPage) Database.getBufferPool().getPage(tid, pid, Permissions.READ_ONLY)).iterator();
+                return iter.next();
+            } catch (DbException | TransactionAbortedException | NoSuchElementException e) {
+                e.printStackTrace();
+                throw e;
+            }
+        } else {
+            throw new NoSuchElementException();
+        }
     }
 
     /**
      * Resets the iterator to the start.
      * @throws DbException When rewind is unsupported.
      */
-    public void rewind() throws DbException, TransactionAbortedException;
+    public void rewind() throws DbException, TransactionAbortedException {
+        try {
+                pageIndexInThisFile = 0;
+                pid = initialId;
+                iter = ((HeapPage) Database.getBufferPool().getPage(tid, pid, Permissions.READ_ONLY)).iterator();
+        } catch (DbException | TransactionAbortedException e) {
+                e.printStackTrace();
+        }
+    }
 
     /**
      * Closes the iterator.
      */
-    p
+
+    public void close() {
+        isOpened = false;
+    }
+
 
 }

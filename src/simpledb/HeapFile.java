@@ -41,24 +41,18 @@ public class HeapFile implements DbFile {
         byte[] pageBytes = new byte[pageSize];
         ArrayList<HeapPage> hpLst = new ArrayList<>();
         pno = 0;
-        int start = 0;
-        int diff = pageSize;
-        for (int i = 0; i < pageNum; i += 1) {
-            try {
-                BufferedInputStream buf = new BufferedInputStream(new FileInputStream(f));
-                buf.read(pageBytes, start, pageSize);
+        try {
+            BufferedInputStream buf = new BufferedInputStream(new FileInputStream(f));
+            for (int i = 0; i < pageNum; i += 1) {
+                buf.read(pageBytes);
                 hpLst.add(new HeapPage(new HeapPageId(fileId, pno), pageBytes));
                 pageBytes = new byte[pageSize];
-                start += diff;
                 pno += 1;
-            } catch (FileNotFoundException e) {
-                e.printStackTrace();
-            } catch (IOException e) {
-                e.printStackTrace();
             }
+        } catch (IOException e) {
+            e.printStackTrace();
         }
-        hps = new HeapPage[pageNum];
-        hps = hpLst.toArray(new HeapPage[1]);
+        hps = hpLst.toArray(new HeapPage[pageNum]);
     }
 
     /**
@@ -131,34 +125,14 @@ public class HeapFile implements DbFile {
     }
 
     // see DbFile.java for javadocs
-    public DbFileIterator iterator(TransactionId tid) {
-        return new DbFileIter(tid, fileId);
+    public DbFileIterator iterator(TransactionId tid) throws DbException, TransactionAbortedException {
+        try {
+            return new DbFileIter(tid, fileId);
+        } catch (DbException | TransactionAbortedException e) {
+            e.printStackTrace();
+            throw e;
+        }
     }
-
-    private class DBFIterator<Tuple> implements Iterator{
-        private int pageIndexInThisFile;
-        private TransactionId tid;
-        private HeapPageId pid;
-
-        public DBFIterator(TransactionId tid) {
-            this.tid = tid;
-            pageIndexInThisFile = 0;
-            pid = new HeapPageId(fileId, pageIndexInThisFile);
-        }
-
-        @Override
-        public boolean hasNext() {
-            return pageIndexInThisFile < pno;
-        }
-
-        @Override
-        public Tuple next() {
-            try{
-                Tuple t = Database.getBufferPool().getPage(tid, pid, Permissions.READ_WRITE);
-                pageIndexInThisFile += 1;
-                pid = new HeapPageId(tid, pageIndexInThisFile);
-            } catch ()
-        }
 
 }
 

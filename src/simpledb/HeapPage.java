@@ -324,7 +324,7 @@ public class HeapPage implements Page {
         return new TIterator();
     }
 
-   private class TIterator<Tuple> implements Iterator {
+    private class TIterator<Tuple> implements Iterator {
         int index;
 
         public TIterator() {
