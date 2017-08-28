@@ -60,7 +60,7 @@ public class BufferPool {
     public  Page getPage(TransactionId tid, PageId pid, Permissions perm)
         throws TransactionAbortedException, DbException {
         for (Page pg : pageList) {
-            if (pg.getId() == pid) {
+            if (pg.getId().equals(pid)) {
                 return pg;
             }
         }
