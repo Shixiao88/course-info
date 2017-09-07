@@ -5,6 +5,9 @@ import java.util.*;
  * The Join operator implements the relational join operation.
  */
 public class Join extends Operator {
+    private JoinPredicate jp;
+    private DbIterator left_outer;
+    private DbIterator right_inner;
 
     /**
      * Constructor.  Accepts to children to join and the predicate
@@ -15,7 +18,10 @@ public class Join extends Operator {
      * @param child2 Iterator for the right(inner) relation to join
      */
     public Join(JoinPredicate p, DbIterator child1, DbIterator child2) {
-        // some code goes here
+        jp = p;
+        left_outer = child1;
+        right_inner = child2;
+        for (DbFile ch1 : left_outer)
     }
 
     /**

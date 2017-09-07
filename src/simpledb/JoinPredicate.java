@@ -5,6 +5,9 @@ package simpledb;
  * JoinPredicate is most likely used by the Join operator.
  */
 public class JoinPredicate {
+    private int fd1;
+    private int fd2;
+    private final Predicate.Op operator;
 
     /**
      * Constructor -- create a new predicate over two fields of two tuples.
@@ -17,7 +20,9 @@ public class JoinPredicate {
      * @see Predicate
      */
     public JoinPredicate(int field1, Predicate.Op op, int field2) {
-        // some code goes here
+        fd1 = field1;
+        fd2 = field2;
+        operator = op;
     }
 
     /**
@@ -26,7 +31,7 @@ public class JoinPredicate {
      * @return true if the tuples satisfy the predicate.
      */
     public boolean filter(Tuple t1, Tuple t2) {
-        // some code goes here
-        return false;
+        Predicate pdc = new Predicate(fd1, operator, t2.getField(fd2));
+        return pdc.filter(t1);
     }
 }
