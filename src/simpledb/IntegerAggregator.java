@@ -4,6 +4,11 @@ package simpledb;
  * Knows how to compute some aggregate over a set of IntFields.
  */
 public class IntegerAggregator implements Aggregator {
+    private final int gbfindex;
+    private final int afield;
+    private final Type gbfieldtype;
+    private final Op op;
+    private Tuple tp;
 
     /**
      * Aggregate constructor
@@ -14,7 +19,11 @@ public class IntegerAggregator implements Aggregator {
      */
 
     public IntegerAggregator(int gbfield, Type gbfieldtype, int afield, Op what) {
-        // some code goes here
+        this.gbfindex = gbfield;
+        this.afield = afield;
+        this.gbfieldtype = gbfieldtype;
+        this.op = what;
+        this.tp = new Tuple (new TupleDesc())
     }
 
     /**
@@ -22,7 +31,7 @@ public class IntegerAggregator implements Aggregator {
      * @param tup the Tuple containing an aggregate field and a group-by field
      */
     public void mergeTupleIntoGroup(Tuple tup) {
-        // some code goes here
+
     }
 
     /**

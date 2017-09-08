@@ -8,6 +8,9 @@ public class Join extends Operator {
     private JoinPredicate jp;
     private DbIterator left_outer;
     private DbIterator right_inner;
+    private TupleDesc joined_td;
+    private TupleDesc td1;
+    private Tuple t_outer;
 
     /**
      * Constructor.  Accepts to children to join and the predicate
@@ -21,28 +24,44 @@ public class Join extends Operator {
         jp = p;
         left_outer = child1;
         right_inner = child2;
-        for (DbFile ch1 : left_outer)
+        TupleDesc td1_outer = left_outer.getTupleDesc();
+        td1 = td1_outer;
+        TupleDesc td2_innter = right_inner.getTupleDesc();
+        joined_td = TupleDesc.merge(td1_outer, td2_innter);
     }
 
     /**
      * @see simpledb.TupleDesc#merge(TupleDesc, TupleDesc) for possible implementation logic.
      */
     public TupleDesc getTupleDesc() {
-        // some code goes here
-        return null;
+        return joined_td;
     }
 
     public void open()
         throws DbException, NoSuchElementException, TransactionAbortedException {
-        // some code goes here
+        try {
+            left_outer.open();
+            right_inner.open();
+            if (left_outer.hasNext()) {
+                t_outer = left_outer.next();
+            }
+        } catch (DbException | NoSuchElementException | TransactionAbortedException e) {
+            e.printStackTrace();
+        }
     }
 
     public void close() {
-        // some code goes here
+        left_outer.close();
+        right_inner.close();
     }
 
     public void rewind() throws DbException, TransactionAbortedException {
-        // some code goes here
+        try {
+            left_outer.rewind();
+            right_inner.rewind();
+        } catch (DbException | TransactionAbortedException e) {
+            e.printStackTrace();
+        }
     }
 
     /**
@@ -65,7 +84,34 @@ public class Join extends Operator {
      * @see JoinPredicate#filter
      */
     protected Tuple fetchNext() throws TransactionAbortedException, DbException {
-        // some code goes here
-        return null;
+        try {
+            while (true) {
+                while (right_inner.hasNext()) {
+                    Tuple t_inner = right_inner.next();
+                    if (jp.filter(t_outer, t_inner)) {
+                        Tuple newtuple = new Tuple(joined_td);
+                        int num_outer = td1.numFields();
+                        int num_total = joined_td.numFields();
+                        for (int i = 0; i < num_outer; i += 1) {
+                            newtuple.setField(i, t_outer.getField(i));
+                        }
+                        for (int i = 0; i < num_total - num_outer; i += 1) {
+                            newtuple.setField(i + num_outer, t_inner.getField(i));
+                        }
+                        return newtuple;
+                    } else {
+                        continue;
+                    }
+                }
+                if (left_outer.hasNext()) {
+                    t_outer = left_outer.next();
+                    right_inner.rewind();
+                } else { break; }
+            }
+            return null;
+        } catch (TransactionAbortedException | DbException e) {
+            e.printStackTrace();
+            throw e;
+        }
     }
 }

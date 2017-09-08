@@ -10,5 +10,8 @@
     <orderEntry type="sourceFolder" forTests="false" />
     <orderEntry type="library" name="lib" level="project" />
     <orderEntry type="library" name="bin" level="project" />
+    <orderEntry type="library" name=".mylyn" level="project" />
+    <orderEntry type="library" name="index-0.0.0" level="project" />
+    <orderEntry type="library" name="lib1" level="project" />
   </component>
 </module>

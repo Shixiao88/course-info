@@ -64,7 +64,7 @@ public class BufferPool {
                 return pg;
             }
         }
-        HeapFile hp = (HeapFile)Database.getCatalog().getDatabaseFile(pid.getTableId());
+        HeapFile hp = (HeapFile)Database.getCatalog().getDbFile(pid.getTableId());
         Page noExistPage = hp.readPage(pid);
         if (pageList.size() < max_page_num) {
             pageList.add(noExistPage);

@@ -5,7 +5,8 @@ import java.util.*;
  * Filter is an operator that implements a relational select.
  */
 public class Filter extends Operator {
-
+    private final Predicate p;
+    private final DbIterator iter;
     /**
      * Constructor accepts a predicate to apply and a child
      * operator to read tuples to filter from.
@@ -14,25 +15,33 @@ public class Filter extends Operator {
      * @param child The child operator
      */
     public Filter(Predicate p, DbIterator child) {
-        // some code goes here
+        this.p = p;
+        this.iter = child;
     }
 
     public TupleDesc getTupleDesc() {
-        // some code goes here
-        return null;
+        return iter.getTupleDesc();
     }
 
     public void open()
         throws DbException, NoSuchElementException, TransactionAbortedException {
-        // some code goes here
+        try {
+            iter.open();
+        } catch (DbException | NoSuchElementException | TransactionAbortedException e) {
+            e.printStackTrace();
+        }
     }
 
     public void close() {
-        // some code goes here
+        iter.close();
     }
 
     public void rewind() throws DbException, TransactionAbortedException {
-        // some code goes here
+        try {
+            iter.rewind();
+        } catch (DbException | TransactionAbortedException e) {
+            e.printStackTrace();
+        }
     }
 
     /**
@@ -46,7 +55,17 @@ public class Filter extends Operator {
      */
     protected Tuple fetchNext()
         throws NoSuchElementException, TransactionAbortedException, DbException {
-        // some code goes here
-        return null;
+        try {
+            while (iter.hasNext()) {
+                Tuple t = iter.next();
+                if (p.filter(t)) {
+                    return t;
+                }
+            }
+            return null;
+        } catch (NoSuchElementException | TransactionAbortedException | DbException e) {
+            e.printStackTrace();
+            throw e;
+        }
     }
 }

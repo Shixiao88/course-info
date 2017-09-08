@@ -33,19 +33,23 @@ public class TupleIterator implements DbIterator {
         }
     }
 
+    @Override
     public void open() {
-        i = tuples.iterator();
+            i = tuples.iterator();
     }
 
-    public boolean hasNext() {
+    @Override
+    public boolean hasNext() throws DbException, TransactionAbortedException {
         return i.hasNext();
     }
 
-    public Tuple next() {
+    @Override
+    public Tuple next() throws DbException, TransactionAbortedException, NoSuchElementException {
         return i.next();
     }
 
-    public void rewind() {
+    @Override
+    public void rewind() throws DbException, TransactionAbortedException {
         close();
         open();
     }
