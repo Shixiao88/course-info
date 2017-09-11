@@ -3,6 +3,7 @@ package simpledb;
 import org.omg.CORBA.INTF_REPOS;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.ListIterator;
 
 /**
@@ -103,13 +104,13 @@ public class IntegerAggregator implements Aggregator {
     }
 
     private class AggIterator implements DbIterator{
-        private ListIterator<Tuple> aggiter;
+        private Iterator<Tuple> aggiter;
         private boolean isopen;
         private TupleDesc td;
 
         public AggIterator() {
-            aggiter = tuplelist.listIterator();
             isopen = false;
+            aggiter = tuplelist.iterator();
         }
 
         public void open() {
@@ -137,7 +138,7 @@ public class IntegerAggregator implements Aggregator {
         @Override
         public void rewind() throws IllegalStateException {
             if (isopen) {
-                aggiter = tuplelist.listIterator();
+                aggiter = tuplelist.iterator();
             } else {
                 throw new IllegalStateException("the iterator is not opened");
             }

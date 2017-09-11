@@ -1,6 +1,7 @@
 package simpledb;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.ListIterator;
 
 /**
@@ -88,12 +89,12 @@ public class StringAggregator implements Aggregator {
     }
 
     private class AggIterator implements DbIterator{
-        private ListIterator<Tuple> aggiter;
+        private Iterator<Tuple> aggiter;
         private boolean isopen;
         private TupleDesc td;
 
         public AggIterator() {
-            aggiter = tuplelist.listIterator();
+            aggiter = tuplelist.iterator();
             isopen = false;
         }
 

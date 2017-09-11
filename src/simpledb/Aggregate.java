@@ -29,12 +29,19 @@ public class Aggregate extends Operator {
     public Aggregate(DbIterator child, int afield, int gfield, Aggregator.Op aop) {
         this.feed = child;
         Type type = child.getTupleDesc().getFieldType(afield);
-        // interger aggregator
+        // integer aggregator
         if (type == Type.INT_TYPE) {
             agg = new IntegerAggregator(gfield, Type.INT_TYPE, afield, aop);
         // string aggregator
         } else if (type == Type.STRING_TYPE) {
             agg = new StringAggregator(gfield, Type.STRING_TYPE, afield, aop);
+        }
+        try {
+            while (feed.hasNext()) {
+                agg.mergeTupleIntoGroup(feed.next());
+            }
+        } catch (DbException | TransactionAbortedException e) {
+            e.printStackTrace();
         }
         aggiter = agg.iterator();
     }
@@ -74,7 +81,6 @@ public class Aggregate extends Operator {
      */
     protected Tuple fetchNext() throws TransactionAbortedException, DbException {
         try {
-            if ()
             if (aggiter.hasNext()) {
                 return aggiter.next();
             }
