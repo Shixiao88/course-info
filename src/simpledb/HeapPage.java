@@ -1,7 +1,10 @@
 package simpledb;
 
+import java.lang.reflect.Array;
+import java.text.ParseException;
 import java.util.*;
 import java.io.*;
+import simpledb.Tuple;
 
 /**
  * Each instance of HeapPage stores data for one page of HeapFiles and 
@@ -15,9 +18,11 @@ public class HeapPage implements Page {
 
     final HeapPageId pid;
     final TupleDesc td;
-    final byte header[];
-    final Tuple tuples[];
-    final int numSlots;
+    private byte header[];
+    private Tuple[] tuples;
+    private int numTuple;
+    private boolean isDirty;
+    private TransactionId dirtytid;
 
     byte[] oldData;
     private final Byte oldDataLock=new Byte((byte)0);
@@ -43,34 +48,36 @@ public class HeapPage implements Page {
     public HeapPage(HeapPageId id, byte[] data) throws IOException {
         this.pid = id;
         this.td = Database.getCatalog().getTupleDesc(id.getTableId());
-        this.numSlots = getNumTuples();
+        this.numTuple = getNumTuples();
         DataInputStream dis = new DataInputStream(new ByteArrayInputStream(data));
 
         // allocate and read the header slots of this page
         header = new byte[getHeaderSize()];
-        for (int i=0; i<header.length; i++) {
+        for (int i=0; i < header.length; i++) {
             header[i] = dis.readByte();
         }
-        tuples = new Tuple[numSlots];
+        this.realTupleNum = numTuple - getNumEmptySlots();
+        tuples = new Tuple[numTuple];
 
-        int reallines = 0;
-        try{
-
+        try {
+            int numField = td.numFields();
             // allocate and read the actual records of this page
-            for (int i=0; i<tuples.length; i++) {
-                Tuple t = readNextTuple(dis, i);
-                if (t != null) {
-                    tuples[i] = t;
-                    reallines += 1;
-                } else {
-                    break;
+            for (int i = 0; i < realTupleNum; i++) {
+                Tuple t = new Tuple(td);
+                for (int j = 0; j < numField; j += 1) {
+                    if (td.getFieldType(j) == Type.INT_TYPE) {
+                        t.setField(j, Type.INT_TYPE.parse(dis));
+                    } else {
+                        t.setField(j, Type.STRING_TYPE.parse(dis));
+                    }
                 }
+                tuples[i] = t;
             }
-        } catch(NoSuchElementException e){
+        }
+        catch(NoSuchElementException | ParseException e){
             e.printStackTrace();
         }
         dis.close();
-        realTupleNum = reallines;
 
         setBeforeImage();
     }
@@ -203,7 +210,7 @@ public class HeapPage implements Page {
                 Field f = tuples[i].getField(j);
                 try {
                     f.serialize(dos);
-                
+
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
@@ -250,8 +257,14 @@ public class HeapPage implements Page {
      * @param t The tuple to delete
      */
     public void deleteTuple(Tuple t) throws DbException {
-        // some code goes here
-        // not necessary for lab1
+        int num_tuple = getNumTuples();
+        for (int i = 0; i < num_tuple; i += 1) {
+            if (t.equals(tuples[i]) && isSlotUsed(i)) {
+                markSlotUsed(i, false);
+                realTupleNum -= 1;
+                return;
+            }
+        } throw new DbException ("tuple not found in this page");
     }
 
     /**
@@ -262,8 +275,17 @@ public class HeapPage implements Page {
      * @param t The tuple to add.
      */
     public void insertTuple(Tuple t) throws DbException {
-        // some code goes here
-        // not necessary for lab1
+        int num_slot = getNumTuples();
+        if (getNumEmptySlots() > 0) {
+            for (int i = 0; i < num_slot; i += 1) {
+                if (!(isSlotUsed(i))) {
+                    markSlotUsed(i, true);
+                    tuples[i] = t;
+                    realTupleNum += 1;
+                    return;
+                }
+            }
+        } else throw new DbException("page is full");
     }
 
     /**
@@ -271,16 +293,17 @@ public class HeapPage implements Page {
      * that did the dirtying
      */
     public void markDirty(boolean dirty, TransactionId tid) {
-        // some code goes here
-	// not necessary for lab1
+        isDirty = dirty;
+        dirtytid = tid;
     }
 
     /**
      * Returns the tid of the transaction that last dirtied this page, or null if the page is not dirty
      */
     public TransactionId isDirty() {
-        // some code goes here
-	// Not necessary for lab1
+        if (isDirty) {
+            return dirtytid;
+        }
         return null;      
     }
 
@@ -295,7 +318,7 @@ public class HeapPage implements Page {
                 counter += ((header[i] >>> j) & 0x1);
             }
         }
-        return (numSlots - counter);
+        return (numTuple - counter);
     }
 
     /**
@@ -312,8 +335,14 @@ public class HeapPage implements Page {
      * Abstraction to fill or clear a slot on this page.
      */
     private void markSlotUsed(int i, boolean value) {
-        // some code goes here
-        // not necessary for lab1
+        int byteindex = i / 8;
+        int offset = i % 8;
+        byte b = header[byteindex];
+        if (value) {
+            header[byteindex] = (byte) (b | (0x1 << offset));
+        } else {
+            header[byteindex] = (byte) (b & (~(0x1 << offset)));
+        }
     }
 
     /**
@@ -324,24 +353,25 @@ public class HeapPage implements Page {
         return new TIterator();
     }
 
-    private class TIterator<Tuple> implements Iterator {
+    private class TIterator implements Iterator<simpledb.Tuple> {
         int index;
 
         public TIterator() {
             index = 0;
         }
 
-        @Override
         public boolean hasNext() {
             return index < realTupleNum;
         }
 
-        @Override
         public Tuple next() {
-            Tuple t = (Tuple)tuples[index];
+            Tuple t = tuples[index];
+            t.setRecordId(new RecordId(pid, index));
             index += 1;
             return t;
         }
+
+        public void close() {}
    }
 
 }
