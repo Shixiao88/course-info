@@ -73,8 +73,6 @@ public class BufferPool {
             /*Eviction Policy afterwards */
             throw new DbException("right now do not have eviction policy, buffer full. ");
         }
-
-
     }
 
     /**
@@ -123,13 +121,13 @@ public class BufferPool {
 
     /**
      * Add a tuple to the specified table behalf of transaction tid.  Will
-     * acquire a write lock on the page the tuple is added to(Lock 
-     * acquisition is not needed for lab2). May block if the lock cannot 
+     * acquire a write lock on the page the tuple is added to(Lock
+     * acquisition is not needed for lab2). May block if the lock cannot
      * be acquired.
-     * 
+     *
      * Marks any pages that were dirtied by the operation as dirty by calling
-     * their markDirty bit, and updates cached versions of any pages that have 
-     * been dirtied so that future requests see up-to-date pages. 
+     * their markDirty bit, and updates cached versions of any pages that have
+     * been dirtied so that future requests see up-to-date pages.
      *
      * @param tid the transaction adding the tuple
      * @param tableId the table to add the tuple to
@@ -137,8 +135,11 @@ public class BufferPool {
      */
     public void insertTuple(TransactionId tid, int tableId, Tuple t)
         throws DbException, IOException, TransactionAbortedException {
-        // some code goes here
-        // not necessary for lab1
+        PageId pgid = t.getRecordId().getPageId();
+        HeapPage hpg = (HeapPage)getPage(tid, pgid, Permissions.READ_WRITE);
+        hpg.insertTuple(t);
+        hpg.markDirty(true, tid);
+        return;
     }
 
     /**
@@ -154,9 +155,8 @@ public class BufferPool {
      * @param tid the transaction deleting the tuple.
      * @param t the tuple to delete
      */
-    public  void deleteTuple(TransactionId tid, Tuple t)
+    public void deleteTuple(TransactionId tid, Tuple t)
         throws DbException, TransactionAbortedException {
-        // some code goes here
         // not necessary for lab1
     }
 
