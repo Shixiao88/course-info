@@ -135,11 +135,15 @@ public class BufferPool {
      */
     public void insertTuple(TransactionId tid, int tableId, Tuple t)
         throws DbException, IOException, TransactionAbortedException {
-        PageId pgid = t.getRecordId().getPageId();
-        HeapPage hpg = (HeapPage)getPage(tid, pgid, Permissions.READ_WRITE);
-        hpg.insertTuple(t);
-        hpg.markDirty(true, tid);
-        return;
+        try {
+            PageId pgid = t.getRecordId().getPageId();
+            HeapPage hpg = (HeapPage) getPage(tid, pgid, Permissions.READ_WRITE);
+            hpg.insertTuple(t);
+            hpg.markDirty(true, tid);
+            return;
+        } catch (DbException | TransactionAbortedException e) {
+            e.printStackTrace();
+        }
     }
 
     /**
@@ -157,7 +161,13 @@ public class BufferPool {
      */
     public void deleteTuple(TransactionId tid, Tuple t)
         throws DbException, TransactionAbortedException {
-        // not necessary for lab1
+        try {
+            PageId pgid = t.getRecordId().getPageId();
+            HeapPage hpg = (HeapPage)getPage(tid, pgid, Permissions.READ_WRITE);
+            hpg.deleteTuple(t);
+        } catch (DbException | TransactionAbortedException e) {
+            e.printStackTrace();
+        }
     }
 
     /**

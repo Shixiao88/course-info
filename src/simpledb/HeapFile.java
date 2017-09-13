@@ -2,8 +2,10 @@ package simpledb;
 
 import org.omg.SendingContext.RunTime;
 
+import javax.xml.crypto.Data;
 import java.io.*;
 import java.lang.reflect.Array;
+import java.nio.Buffer;
 import java.util.*;
 
 /**
@@ -21,8 +23,6 @@ public class HeapFile implements DbFile {
     private final File file;
     private final TupleDesc td;
     private final int fileId;
-    private HeapPage[] hps;
-    private int pno;
 
     /**
      * Constructs a heap file backed by the specified file.
@@ -36,23 +36,7 @@ public class HeapFile implements DbFile {
         this.td = td;
         this.fileId = f.getAbsoluteFile().hashCode();
         Database.getCatalog().addTable(this);
-        int pageSize = BufferPool.getPageSize();
-        int pageNum = (int)Math.floor((int) file.length()) / (pageSize);
-        byte[] pageBytes = new byte[pageSize];
-        ArrayList<HeapPage> hpLst = new ArrayList<>();
-        pno = 0;
-        try {
-            BufferedInputStream buf = new BufferedInputStream(new FileInputStream(f));
-            for (int i = 0; i < pageNum; i += 1) {
-                buf.read(pageBytes);
-                hpLst.add(new HeapPage(new HeapPageId(fileId, pno), pageBytes));
-                pageBytes = new byte[pageSize];
-                pno += 1;
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        hps = hpLst.toArray(new HeapPage[pageNum]);
+
     }
 
     /**
@@ -88,11 +72,22 @@ public class HeapFile implements DbFile {
 
     // see DbFile.java for javadocs
     public Page readPage(PageId pid) {
-        int pno = pid.pageNumber();
-        if (hps[pno] == null) {
-           throw new IllegalArgumentException();
+        try {
+            RandomAccessFile raf = new RandomAccessFile(file, "r");
+            int pno = pid.pageNumber();
+            int off = pno * BufferPool.getPageSize();
+            byte[] b = new byte[BufferPool.getPageSize()];
+            int readin = raf.read(b, off, BufferPool.getPageSize());
+            raf.close();
+            if (readin < 0) {
+                return null;
+            }
+            HeapPage hp = new HeapPage((HeapPageId)pid, b);
+            return hp;
+        } catch (IOException e) {
+            e.printStackTrace();
+            return null;
         }
-        return hps[pno];
     }
 
     // see DbFile.java for javadocs
@@ -105,23 +100,86 @@ public class HeapFile implements DbFile {
      * Returns the number of pages in this HeapFile.
      */
     public int numPages() {
-        return pno;
+        int pageSize = BufferPool.getPageSize();
+        int pageNum = (int)Math.floor((int) file.length()) / (pageSize);
+        return pageNum;
     }
 
     // see DbFile.java for javadocs
     public ArrayList<Page> insertTuple(TransactionId tid, Tuple t)
-            throws DbException, IOException, TransactionAbortedException {
-        // some code goes here
-        return null;
-        // not necessary for lab1
+        throws DbException, IOException, TransactionAbortedException {
+        ArrayList<Page> insertPages = new ArrayList<>();
+        byte[] data = tuple2Data(t);
+        int pno = numPages();
+        for (int i = 0; i < pno; i += 1) {
+            HeapPage heapPage = (HeapPage)Database.getBufferPool().getPage(
+                    tid, new HeapPageId(getId(), i), Permissions.READ_WRITE);
+            try {
+                //find a page with empty slot, insert into this empty slot and write to the file
+                heapPage.insertTuple(t);
+                insertPages.add(heapPage);
+                RandomAccessFile raf = new RandomAccessFile(file, "rw");
+                raf.write(data, i * BufferPool.getPageSize(), BufferPool.getPageSize());
+                raf.close();
+                return insertPages;
+            } catch (DbException e) {
+                continue;
+            }
+        }
+        // if no page with empty slots, create a new page and append to the end of file
+        byte[] newEmptyData = HeapPage.createEmptyPageData();
+        for (int i = 0; i < data.length; i += 1) {
+            newEmptyData[i] = data[i];
+        }
+        HeapPage hp = new HeapPage(new HeapPageId(getId(), pno + 1), newEmptyData);
+        insertPages.add(hp);
+        try {
+            FileOutputStream fout = new FileOutputStream(file, true);
+            fout.write(newEmptyData);
+            fout.close();
+            return insertPages;
+        } catch (IOException e) {
+            throw e;
+        }
     }
 
+    private byte[] tuple2Data(Tuple t) {
+        TupleDesc td = t.getTupleDesc();
+        byte[] data = new byte[td.getSize()];
+        int j = 0;
+        // convert tuple to byte array
+        for (int i = 0; i < td.numFields(); i += 1) {
+            if (td.getFieldType(i).equals(Type.INT_TYPE)) {
+                // big endian
+                data[j++] = (byte)(((IntField)t.getField(i)).getValue() & (0xff << 8));
+                data[j++] = (byte)(((IntField)t.getField(i)).getValue() & 0xff);
+            } else {
+                byte[] b = ((StringField)t.getField(i)).toString().getBytes();
+                for (int p = 0; p < Type.STRING_LEN; p += 1) {
+                    data[j++] = b[p];
+                }
+            }
+        }
+        return data;
+    }
+
+    private void changePageArray(HeapPage[] hparray, int size) {
+        int len = hparray.length;
+        HeapPage[] newarray = new HeapPage[size];
+        int maxrange = Math.min(len, size);
+        for (int i = 0; i < maxrange; i += 1) {
+            newarray[i] = hparray[i];
+        }
+        hparray = newarray;
+    }
     // see DbFile.java for javadocs
     public Page deleteTuple(TransactionId tid, Tuple t) throws DbException,
-            TransactionAbortedException {
-        // some code goes here
-        return null;
-        // not necessary for lab1
+        TransactionAbortedException {
+
+        PageId pid = t.getRecordId().getPageId();
+        Database.getBufferPool().deleteTuple(tid, t);
+        Page pg = Database.getBufferPool().getPage(tid, pid, Permissions.READ_ONLY);
+        return pg;
     }
 
     // see DbFile.java for javadocs

@@ -6,6 +6,10 @@ import java.util.*;
  * the tableid specified in the constructor
  */
 public class Insert extends Operator {
+    private TransactionId tid;
+    private DbIterator dbiter;
+    private HeapFile hpfile;
+    private DbFileIter hpiter;
 
     /**
      * Constructor.
@@ -16,24 +20,35 @@ public class Insert extends Operator {
      */
     public Insert(TransactionId t, DbIterator child, int tableid)
         throws DbException {
-        // some code goes here
+        TupleDesc tdchild = child.getTupleDesc();
+        TupleDesc tdtableid = Database.getCatalog().getTupleDesc(tableid);
+        if (!(tdchild.equals(tdtableid))) {
+            this.tid = t;
+            this.dbiter = child;
+            hpfile = (HeapFile)Database.getCatalog().getDbFile(tableid);
+        } else {
+            throw new DbException("tuple description is not correspondent");
+        }
     }
 
     public TupleDesc getTupleDesc() {
-        // some code goes here
-        return null;
+        return dbiter.getTupleDesc();
     }
 
     public void open() throws DbException, TransactionAbortedException {
-        // some code goes here
+        dbiter.open();
+        hpiter = (DbFileIter)hpfile.iterator(tid);
+        hpiter.open();
     }
 
     public void close() {
-        // some code goes here
+        dbiter.close();
+        hpiter.close();
     }
 
     public void rewind() throws DbException, TransactionAbortedException {
-        // some code goes here
+        dbiter.rewind();
+        hpiter.rewind();
     }
 
     /**
@@ -51,6 +66,10 @@ public class Insert extends Operator {
      */
     protected Tuple fetchNext()
             throws TransactionAbortedException, DbException {
+        if (dbiter.hasNext()) {
+            hpfile.insertTuple(tid, dbiter.next());
+            return dbiter.next();
+        }
         // some code goes here
         return null;
     }
