@@ -1,4 +1,5 @@
 package simpledb;
+import java.io.IOException;
 import java.util.*;
 
 /**
@@ -7,9 +8,10 @@ import java.util.*;
  */
 public class Insert extends Operator {
     private TransactionId tid;
-    private DbIterator dbiter;
-    private HeapFile hpfile;
+    private DbIterator feediter;
+    private int tableId;
     private DbFileIter hpiter;
+    private boolean isDone;
 
     /**
      * Constructor.
@@ -19,35 +21,38 @@ public class Insert extends Operator {
      * @throws DbException if TupleDesc of child differs from table into which we are to insert.
      */
     public Insert(TransactionId t, DbIterator child, int tableid)
-        throws DbException {
+        throws DbException, TransactionAbortedException {
         TupleDesc tdchild = child.getTupleDesc();
         TupleDesc tdtableid = Database.getCatalog().getTupleDesc(tableid);
-        if (!(tdchild.equals(tdtableid))) {
+        if (tdchild.equals(tdtableid)) {
             this.tid = t;
-            this.dbiter = child;
-            hpfile = (HeapFile)Database.getCatalog().getDbFile(tableid);
+            this.feediter = child;
+            this.tableId = tableid;
+            HeapFile hpfile = (HeapFile) Database.getCatalog().getDbFile(tableid);
+            hpiter = (DbFileIter)hpfile.iterator(tid);
+            isDone = false;
         } else {
             throw new DbException("tuple description is not correspondent");
         }
     }
 
     public TupleDesc getTupleDesc() {
-        return dbiter.getTupleDesc();
+        Type[] t = new Type[] {Type.INT_TYPE};
+        return new TupleDesc(t);
     }
 
     public void open() throws DbException, TransactionAbortedException {
-        dbiter.open();
-        hpiter = (DbFileIter)hpfile.iterator(tid);
+        feediter.open();
         hpiter.open();
     }
 
     public void close() {
-        dbiter.close();
+        feediter.close();
         hpiter.close();
     }
 
     public void rewind() throws DbException, TransactionAbortedException {
-        dbiter.rewind();
+        feediter.rewind();
         hpiter.rewind();
     }
 
@@ -66,11 +71,24 @@ public class Insert extends Operator {
      */
     protected Tuple fetchNext()
             throws TransactionAbortedException, DbException {
-        if (dbiter.hasNext()) {
-            hpfile.insertTuple(tid, dbiter.next());
-            return dbiter.next();
+        if (isDone) {
+            return null;
         }
-        // some code goes here
-        return null;
+        int counter = 0;
+        while (feediter.hasNext()) {
+            Tuple t = feediter.next();
+            try {
+                Database.getBufferPool().insertTuple(tid, tableId, t);
+                counter += 1;
+            } catch (IOException e) {
+                e.printStackTrace();
+                return null;
+            }
+        }
+        Type[] typearry = new Type[] {Type.INT_TYPE};
+        Tuple res = new Tuple(new TupleDesc(typearry));
+        res.setField(0, new IntField(counter));
+        isDone = true;
+        return res;
     }
 }

@@ -276,6 +276,7 @@ public class HeapPage implements Page {
      */
     public void insertTuple(Tuple t) throws DbException {
         int num_slot = getNumTuples();
+        int f = getNumEmptySlots();
         if (getNumEmptySlots() > 0) {
             for (int i = 0; i < num_slot; i += 1) {
                 if (!(isSlotUsed(i))) {
@@ -350,25 +351,29 @@ public class HeapPage implements Page {
      * @return an iterator over all tuples on this page (calling remove on this iterator throws an UnsupportedOperationException)
      * (note that this iterator shouldn't return tuples in empty slots!)
      */
-    public Iterator<Tuple> iterator() {
+    public TIterator iterator() {
         return new TIterator();
     }
 
-    private class TIterator implements Iterator<simpledb.Tuple> {
+    private class TIterator implements Iterator<Tuple> {
         int index;
+        int counter;
 
         public TIterator() {
             index = 0;
         }
 
         public boolean hasNext() {
-            return index < realTupleNum;
+            return counter < realTupleNum;
         }
 
         public Tuple next() {
+            while (!isSlotUsed(index)) {
+                index += 1;
+            }
             Tuple t = tuples[index];
-            t.setRecordId(new RecordId(pid, index));
             index += 1;
+            counter += 1;
             return t;
         }
 

@@ -39,6 +39,7 @@ public class SeqScan implements DbIterator {
         this.tid = tid;
         this.tableId = tableid;
         this.alias = tableAlias;
+        f = (HeapFile) Database.getCatalog().getDbFile(tableId);
     }
 
     /**
@@ -80,7 +81,6 @@ public class SeqScan implements DbIterator {
 
     public void open() throws DbException, TransactionAbortedException {
         try {
-            f = (HeapFile) Database.getCatalog().getDbFile(tableId);
             iter = (DbFileIter)f.iterator(tid);
             iter.open();
         } catch (DbException | TransactionAbortedException e) {

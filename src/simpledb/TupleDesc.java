@@ -86,8 +86,10 @@ public class TupleDesc implements Serializable {
     public TupleDesc(Type[] typeAr, String[] fieldAr) {
         this.tditmeNum = typeAr.length;
         ArrayList<TDItem> tds = new ArrayList<>();
-        for (int i = 0; i < tditmeNum; i += 1) {
-            tds.add( new TDItem(typeAr[i], fieldAr[i]));
+        if (fieldAr != null) {
+            for (int i = 0; i < tditmeNum; i += 1) {
+                tds.add(new TDItem(typeAr[i], fieldAr[i]));
+            }
         }
         this.tditmes = tds.toArray(new TDItem[1]);
     }

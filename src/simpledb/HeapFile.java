@@ -75,14 +75,14 @@ public class HeapFile implements DbFile {
         try {
             RandomAccessFile raf = new RandomAccessFile(file, "r");
             int pno = pid.pageNumber();
-            int off = pno * BufferPool.getPageSize();
+            raf.seek((long)pno * BufferPool.getPageSize());
             byte[] b = new byte[BufferPool.getPageSize()];
-            int readin = raf.read(b, off, BufferPool.getPageSize());
+            int readin = raf.read(b);
             raf.close();
             if (readin < 0) {
-                return null;
+                b = HeapPage.createEmptyPageData();
             }
-            HeapPage hp = new HeapPage((HeapPageId)pid, b);
+            HeapPage hp = new HeapPage((HeapPageId) pid, b);
             return hp;
         } catch (IOException e) {
             e.printStackTrace();
@@ -109,7 +109,6 @@ public class HeapFile implements DbFile {
     public ArrayList<Page> insertTuple(TransactionId tid, Tuple t)
         throws DbException, IOException, TransactionAbortedException {
         ArrayList<Page> insertPages = new ArrayList<>();
-        byte[] data = tuple2Data(t);
         int pno = numPages();
         for (int i = 0; i < pno; i += 1) {
             HeapPage heapPage = (HeapPage)Database.getBufferPool().getPage(
@@ -119,7 +118,8 @@ public class HeapFile implements DbFile {
                 heapPage.insertTuple(t);
                 insertPages.add(heapPage);
                 RandomAccessFile raf = new RandomAccessFile(file, "rw");
-                raf.write(data, i * BufferPool.getPageSize(), BufferPool.getPageSize());
+                raf.seek((long)i * BufferPool.getPageSize());
+                raf.write(heapPage.getPageData());
                 raf.close();
                 return insertPages;
             } catch (DbException e) {
@@ -128,14 +128,12 @@ public class HeapFile implements DbFile {
         }
         // if no page with empty slots, create a new page and append to the end of file
         byte[] newEmptyData = HeapPage.createEmptyPageData();
-        for (int i = 0; i < data.length; i += 1) {
-            newEmptyData[i] = data[i];
-        }
         HeapPage hp = new HeapPage(new HeapPageId(getId(), pno + 1), newEmptyData);
+        hp.insertTuple(t);
         insertPages.add(hp);
         try {
             FileOutputStream fout = new FileOutputStream(file, true);
-            fout.write(newEmptyData);
+            fout.write(hp.getPageData());
             fout.close();
             return insertPages;
         } catch (IOException e) {
@@ -143,35 +141,6 @@ public class HeapFile implements DbFile {
         }
     }
 
-    private byte[] tuple2Data(Tuple t) {
-        TupleDesc td = t.getTupleDesc();
-        byte[] data = new byte[td.getSize()];
-        int j = 0;
-        // convert tuple to byte array
-        for (int i = 0; i < td.numFields(); i += 1) {
-            if (td.getFieldType(i).equals(Type.INT_TYPE)) {
-                // big endian
-                data[j++] = (byte)(((IntField)t.getField(i)).getValue() & (0xff << 8));
-                data[j++] = (byte)(((IntField)t.getField(i)).getValue() & 0xff);
-            } else {
-                byte[] b = ((StringField)t.getField(i)).toString().getBytes();
-                for (int p = 0; p < Type.STRING_LEN; p += 1) {
-                    data[j++] = b[p];
-                }
-            }
-        }
-        return data;
-    }
-
-    private void changePageArray(HeapPage[] hparray, int size) {
-        int len = hparray.length;
-        HeapPage[] newarray = new HeapPage[size];
-        int maxrange = Math.min(len, size);
-        for (int i = 0; i < maxrange; i += 1) {
-            newarray[i] = hparray[i];
-        }
-        hparray = newarray;
-    }
     // see DbFile.java for javadocs
     public Page deleteTuple(TransactionId tid, Tuple t) throws DbException,
         TransactionAbortedException {

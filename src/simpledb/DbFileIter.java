@@ -29,6 +29,8 @@ public class DbFileIter implements DbFileIterator {
             pid = new HeapPageId(fileId, pageIndexInThisFile);
             initialId = new HeapPageId(fileId, 0);
             f = (HeapFile) Database.getCatalog().getDbFile(fileId);
+            HeapPage page = (HeapPage)Database.getBufferPool().getPage(tid, pid, Permissions.READ_WRITE);
+            iter = page.iterator();
             iter = ((HeapPage) Database.getBufferPool().getPage(tid, pid, Permissions.READ_ONLY)).iterator();
         } catch (TransactionAbortedException | DbException e) {
             e.printStackTrace();
