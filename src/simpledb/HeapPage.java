@@ -71,6 +71,7 @@ public class HeapPage implements Page {
                         t.setField(j, Type.STRING_TYPE.parse(dis));
                     }
                 }
+                t.setRecordId(new RecordId(pid, i));
                 tuples[i] = t;
             }
         }
@@ -94,7 +95,9 @@ public class HeapPage implements Page {
      * @return the number of bytes in the header of a page in a HeapFile with each tuple occupying tupleSize bytes
      */
     private int getHeaderSize() {
-        return (int)(Math.ceil(((double)getNumTuples() / 8)));
+        double n = Math.ceil((double)getNumTuples() / 8);
+        int n1 = (int) n;
+        return n1;
     }
     
     /** Return a view of this page before it was modified
@@ -328,6 +331,9 @@ public class HeapPage implements Page {
      */
     public boolean isSlotUsed(int i) {
         int byteIndex = i / 8;
+        if (byteIndex == 43) {
+            return false;
+        }
         int offset = i % 8;
         byte b = 0x1;
         return (((header[byteIndex] >> offset) & b) == 1);
@@ -358,20 +364,28 @@ public class HeapPage implements Page {
     private class TIterator implements Iterator<Tuple> {
         int index;
         int counter;
+        int tuplelen;
 
         public TIterator() {
             index = 0;
+            counter = 0;
+            tuplelen = tuples.length;
         }
 
         public boolean hasNext() {
-            return counter < realTupleNum;
+            while (!isSlotUsed(index)) {
+                if (index < tuplelen - 1) {
+                    index ++;
+                } else {
+                    return false;
+                }
+            }
+            return true;
         }
 
         public Tuple next() {
-            while (!isSlotUsed(index)) {
-                index += 1;
-            }
             Tuple t = tuples[index];
+            t.resetTupleDesc(td);
             index += 1;
             counter += 1;
             return t;
