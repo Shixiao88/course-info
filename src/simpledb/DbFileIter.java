@@ -53,12 +53,22 @@ public class DbFileIter implements DbFileIterator {
         // if there is no page in the file and in the file there is no more tuple to iterate.
         // then it has no next value
         if (!isOpened) { return false;}
-        boolean s = (pageIndexInThisFile < f.numPages());
+        while (pageIndexInThisFile < f.numPages()) {
+            if (iter.hasNext()) {
+                return true;
+            }
+            pageIndexInThisFile ++;
+            HeapPage nextpage = (HeapPage)Database.getBufferPool().getPage(
+                    tid, new HeapPageId(fileId, pageIndexInThisFile), Permissions.READ_ONLY);
+            iter = nextpage.iterator();
+        }
+        return false;
+        /*boolean s = (pageIndexInThisFile < f.numPages());
         boolean b = iter.hasNext();
         if (iter.hasNext()) {
             return true;
         }
-        else { return pageIndexInThisFile + 1 < f.numPages();}
+        else { return pageIndexInThisFile + 1 < f.numPages();}*/
     }
 
     /**

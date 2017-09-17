@@ -331,9 +331,6 @@ public class HeapPage implements Page {
      */
     public boolean isSlotUsed(int i) {
         int byteIndex = i / 8;
-        if (byteIndex == 43) {
-            return false;
-        }
         int offset = i % 8;
         byte b = 0x1;
         return (((header[byteIndex] >> offset) & b) == 1);
