@@ -55,7 +55,9 @@ public class DbFileIter implements DbFileIterator {
         if (!isOpened) { return false;}
         boolean s = (pageIndexInThisFile < f.numPages());
         boolean b = iter.hasNext();
-        if (iter.hasNext()) { return true;}
+        if (iter.hasNext()) {
+            return true;
+        }
         else { return pageIndexInThisFile + 1 < f.numPages();}
     }
 

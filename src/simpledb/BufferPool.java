@@ -163,7 +163,8 @@ public class BufferPool {
     public void deleteTuple(TransactionId tid, Tuple t)
         throws DbException, TransactionAbortedException {
         try {
-            HeapFile f = (HeapFile) Database.getCatalog().getDbFile(t.getRecordId().getPageId().getTableId());
+            int tableid = t.getRecordId().getPageId().getTableId();
+            HeapFile f = (HeapFile) Database.getCatalog().getDbFile(tableid);
             HeapPage hpg = (HeapPage) f.deleteTuple(tid, t);
             hpg.markDirty(true, tid);
         } catch (DbException | TransactionAbortedException e) {

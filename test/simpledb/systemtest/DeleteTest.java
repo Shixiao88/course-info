@@ -31,6 +31,12 @@ public class DeleteTest extends FilterBase {
 
         deleteOperator.close();
 
+        SeqScan scan = new SeqScan(new TransactionId(), table.getId(),"");
+        scan.open();
+        while (scan.hasNext()) {
+            Tuple t = scan.next();
+        }
+
         // As part of the same transaction, scan the table
         if (result == 0) {
             // Deleted zero tuples: all tuples still in table

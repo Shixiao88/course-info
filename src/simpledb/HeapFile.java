@@ -144,11 +144,20 @@ public class HeapFile implements DbFile {
     // see DbFile.java for javadocs
     public Page deleteTuple(TransactionId tid, Tuple t) throws DbException,
         TransactionAbortedException {
-
         PageId pid = t.getRecordId().getPageId();
-        Database.getBufferPool().deleteTuple(tid, t);
-        Page pg = Database.getBufferPool().getPage(tid, pid, Permissions.READ_ONLY);
-        return pg;
+        HeapPage page = (HeapPage)Database.getBufferPool().getPage(tid, pid, Permissions.READ_WRITE);
+        page.deleteTuple(t);
+        byte[] b = page.getPageData();
+        try {
+            int pno = pid.pageNumber();
+            RandomAccessFile fout = new RandomAccessFile(file, "rw");
+            fout.seek(BufferPool.getPageSize() * pno);
+            fout.write(b, 0, BufferPool.getPageSize());
+        } catch (IOException e) {
+            e.printStackTrace();
+            return null;
+        }
+        return page;
     }
 
     // see DbFile.java for javadocs

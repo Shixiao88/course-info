@@ -5,6 +5,9 @@ package simpledb;
  * removes them from the table they belong to.
  */
 public class Delete extends Operator {
+    private TransactionId tid;
+    private DbIterator feed;
+    private boolean isDone;
 
     /**
      * Constructor specifying the transaction that this delete belongs to as
@@ -13,24 +16,25 @@ public class Delete extends Operator {
      * @param child The child operator from which to read tuples for deletion
      */
     public Delete(TransactionId t, DbIterator child) {
-        // some code goes here
+        this.tid = t;
+        this.feed = child;
+        this.isDone = false;
     }
 
     public TupleDesc getTupleDesc() {
-        // some code goes here
-        return null;
+        return feed.getTupleDesc();
     }
 
     public void open() throws DbException, TransactionAbortedException {
-        // some code goes here
+        this.feed.open();
     }
 
     public void close() {
-        // some code goes here
+        this.feed.close();
     }
 
     public void rewind() throws DbException, TransactionAbortedException {
-        // some code goes here
+        this.feed.rewind();
     }
 
     /**
@@ -42,7 +46,23 @@ public class Delete extends Operator {
      * @see BufferPool#deleteTuple
      */
     protected Tuple fetchNext() throws TransactionAbortedException, DbException {
-        // some code goes here
-        return null;
+        if (isDone) {
+            return null;
+        }
+        int counter = 0;
+        while(feed.hasNext()) {
+            Tuple t = feed.next();
+            try {
+                Database.getBufferPool().deleteTuple(tid, t);
+                counter++;
+            } catch (DbException e) {
+                continue;
+            }
+        }
+        Type[] typearry = new Type[] {Type.INT_TYPE};
+        Tuple res = new Tuple(new TupleDesc(typearry));
+        res.setField(0, new IntField(counter));
+        isDone = true;
+        return res;
     }
 }
