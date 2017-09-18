@@ -13,7 +13,7 @@ import java.util.Iterator;
 public class Tuple implements Serializable {
 
     private static final long serialVersionUID = 1L;
-    private static TupleDesc tdec;
+    private TupleDesc tdec;
     private Field[] fields;
     private int num;
     private RecordId rid;

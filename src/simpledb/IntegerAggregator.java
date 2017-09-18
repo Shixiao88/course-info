@@ -58,12 +58,7 @@ public class IntegerAggregator implements Aggregator {
                 }
         } else {
             for (Tuple t : tuplelist) {
-                TupleDesc tddebug = t.getTupleDesc();
                 if (tup.getField(gbfindex).equals(t.getField(groupedIndex))) {
-                    /* debug */
-                    TupleDesc tdec = t.getTupleDesc();
-                    int n = tdec.numFields();
-                    /* End debug */
                     hasGroup = true;
                     IntField fd1 = (IntField)tup.getField(afield);
                     IntField fd2 = (IntField)t.getField(groupedVal);
@@ -147,9 +142,7 @@ public class IntegerAggregator implements Aggregator {
         @Override
         public Tuple next() throws  IllegalStateException {
             if (isopen) {
-                Tuple t = agit.next();
-                TupleDesc td = t.getTupleDesc();
-                int s = td.numFields();
+                int lendebug  = tuplelist.size();
                 return agit.next();
             } else {
                 throw new IllegalStateException("the iterator is not opened");
