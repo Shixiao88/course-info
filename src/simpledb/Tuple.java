@@ -13,7 +13,7 @@ import java.util.Iterator;
 public class Tuple implements Serializable {
 
     private static final long serialVersionUID = 1L;
-    private static TupleDesc td;
+    private static TupleDesc tdec;
     private Field[] fields;
     private int num;
     private RecordId rid;
@@ -26,7 +26,7 @@ public class Tuple implements Serializable {
      *            instance with at least one field.
      */
     public Tuple(TupleDesc td) {
-        this.td = td;
+        tdec = td;
         this.num = td.numFields();
         this.fields = new Field[num];
         ArrayList<Field> fds = new ArrayList<>();
@@ -44,7 +44,7 @@ public class Tuple implements Serializable {
      * @return The TupleDesc representing the schema of this tuple.
      */
     public TupleDesc getTupleDesc() {
-        return this.td;
+        return tdec;
     }
 
     /**
@@ -146,6 +146,6 @@ public class Tuple implements Serializable {
      * reset the TupleDesc of this tuple
      * */
     public void resetTupleDesc(TupleDesc td) {
-        this.td = td;
+       tdec = td;
     }
 }

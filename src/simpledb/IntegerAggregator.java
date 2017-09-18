@@ -15,7 +15,7 @@ public class IntegerAggregator implements Aggregator {
     private final Type gbfieldtype;
     private final Op op;
     private ArrayList<Tuple> tuplelist;
-    private TupleDesc td;
+
     /**
      * Aggregate constructor
      * @param gbfield the 0-based index of the group-by field in the tuple, or NO_GROUPING if there is no grouping
@@ -38,53 +38,71 @@ public class IntegerAggregator implements Aggregator {
      */
     public void mergeTupleIntoGroup(Tuple tup) {
         boolean hasGroup = false;
-        td = tup.getTupleDesc();
-        if (tuplelist.size() == 0) {
-            Tuple newtuple = new Tuple(td);
+        TupleDesc globalTupleDecs = tup.getTupleDesc();
+        int groupedVal = 1;
+        int groupedIndex = 0;
+        if (tuplelist.size() == 0 ) {
             if (op == Op.COUNT) {
-                newtuple.setField(gbfindex, tup.getField(gbfindex));
-                newtuple.setField(afield, new IntField(1));
+                TupleDesc restd = new TupleDesc(new Type[]{globalTupleDecs.getFieldType(gbfindex), Type.INT_TYPE});
+                Tuple newtuple = new Tuple(restd);
+                newtuple.setField(groupedVal, new IntField(1));
+                newtuple.setField(groupedIndex, tup.getField(gbfindex));
+                tuplelist.add(newtuple);
             } else {
+                TupleDesc restd = new TupleDesc(new Type[]
+                        {globalTupleDecs.getFieldType(gbfindex), globalTupleDecs.getFieldType(afield)});
+                Tuple newtuple = new Tuple(restd);
                 newtuple.setField(gbfindex, tup.getField(gbfindex));
                 newtuple.setField(afield, tup.getField(afield));
+                tuplelist.add(newtuple);
                 }
-            tuplelist.add(newtuple);
         } else {
             for (Tuple t : tuplelist) {
-                if (tup.getField(gbfindex).equals(t.getField(gbfindex))) {
+                TupleDesc tddebug = t.getTupleDesc();
+                if (tup.getField(gbfindex).equals(t.getField(groupedIndex))) {
+                    /* debug */
+                    TupleDesc tdec = t.getTupleDesc();
+                    int n = tdec.numFields();
+                    /* End debug */
                     hasGroup = true;
                     IntField fd1 = (IntField)tup.getField(afield);
-                    IntField fd2 = (IntField)t.getField(afield);
+                    IntField fd2 = (IntField)t.getField(groupedVal);
                     switch(op) {
                     case MAX:
                         if (fd1.compare(Predicate.Op.GREATER_THAN_OR_EQ, fd2)) {
-                            t.setField(afield, fd1);
+                            t.setField(groupedVal, fd1);
                         } break;
                     case MIN:
                          if (fd1.compare(Predicate.Op.LESS_THAN_OR_EQ, fd2)) {
-                             t.setField(afield, fd1);
+                             t.setField(groupedVal, fd1);
                          } break;
                     case AVG:
-                         t.setField(afield, new IntField((fd1.getValue() + fd2.getValue()) / 2));
+                         t.setField(groupedVal, new IntField((fd1.getValue() + fd2.getValue()) / 2));
                          break;
                     case SUM:
-                         t.setField(afield, new IntField(fd1.getValue() + fd2.getValue()));
+                         t.setField(groupedVal, new IntField(fd1.getValue() + fd2.getValue()));
                          break;
                     case COUNT:
                          int counter = fd2.getValue() + 1;
-                         t.setField(afield, new IntField(counter));
+                         t.setField(groupedVal, new IntField(counter));
                          break;
                     }
                 }
             }
-            if (!hasGroup) {  Tuple res = new Tuple(td);
+            if (!hasGroup) {
                 if (op == Op.COUNT) {
-                    res.setField(gbfindex, tup.getField(gbfindex));
-                    res.setField(afield, new IntField(1));
-                    tuplelist.add(res);
+                    TupleDesc restd = new TupleDesc(new Type[]{globalTupleDecs.getFieldType(gbfindex), Type.INT_TYPE});
+                    Tuple newtuple = new Tuple(restd);
+                    newtuple.setField(groupedVal, new IntField(1));
+                    newtuple.setField(groupedIndex, tup.getField(gbfindex));
+                    TupleDesc debugtd = newtuple.getTupleDesc();
+                    tuplelist.add(newtuple);
                 } else {
-                    res.setField(gbfindex, tup.getField(gbfindex));
-                    res.setField(afield, tup.getField(afield));
+                    TupleDesc restd = new TupleDesc(new Type[]
+                        {globalTupleDecs.getFieldType(gbfindex), globalTupleDecs.getFieldType(afield)});
+                    Tuple res = new Tuple(restd);
+                    res.setField(0, tup.getField(gbfindex));
+                    res.setField(1, tup.getField(afield));
                     tuplelist.add(res);
                 }
             }
@@ -104,13 +122,13 @@ public class IntegerAggregator implements Aggregator {
     }
 
     private class AggIterator implements DbIterator{
-        private Iterator<Tuple> aggiter;
+        private Iterator<Tuple> agit;
         private boolean isopen;
         private TupleDesc td;
 
         public AggIterator() {
             isopen = false;
-            aggiter = tuplelist.iterator();
+            agit = tuplelist.iterator();
         }
 
         public void open() {
@@ -120,7 +138,7 @@ public class IntegerAggregator implements Aggregator {
         @Override
         public boolean hasNext() throws IllegalStateException {
             if (isopen) {
-                return aggiter.hasNext();
+                return agit.hasNext();
             } else {
                 throw new IllegalStateException ("the iterator is not opened");
             }
@@ -129,7 +147,10 @@ public class IntegerAggregator implements Aggregator {
         @Override
         public Tuple next() throws  IllegalStateException {
             if (isopen) {
-                return aggiter.next();
+                Tuple t = agit.next();
+                TupleDesc td = t.getTupleDesc();
+                int s = td.numFields();
+                return agit.next();
             } else {
                 throw new IllegalStateException("the iterator is not opened");
             }
@@ -138,7 +159,7 @@ public class IntegerAggregator implements Aggregator {
         @Override
         public void rewind() throws IllegalStateException {
             if (isopen) {
-                aggiter = tuplelist.iterator();
+                agit = tuplelist.iterator();
             } else {
                 throw new IllegalStateException("the iterator is not opened");
             }

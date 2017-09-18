@@ -153,6 +153,7 @@ public class HeapFile implements DbFile {
             RandomAccessFile fout = new RandomAccessFile(file, "rw");
             fout.seek(BufferPool.getPageSize() * pno);
             fout.write(b, 0, BufferPool.getPageSize());
+            fout.close();
         } catch (IOException e) {
             e.printStackTrace();
             return null;

@@ -37,13 +37,13 @@ public class Aggregate extends Operator {
             agg = new StringAggregator(gfield, Type.STRING_TYPE, afield, aop);
         }
         try {
+            feed.open();
             while (feed.hasNext()) {
                 agg.mergeTupleIntoGroup(feed.next());
-            }
+            } aggiter = agg.iterator();
         } catch (DbException | TransactionAbortedException e) {
             e.printStackTrace();
         }
-        aggiter = agg.iterator();
     }
 
     public static String nameOfAggregatorOp(Aggregator.Op aop) {
@@ -64,11 +64,7 @@ public class Aggregate extends Operator {
 
     public void open()
         throws NoSuchElementException, DbException, TransactionAbortedException {
-        try {
-            aggiter.open();
-        } catch (NoSuchElementException | DbException | TransactionAbortedException e) {
-            e.printStackTrace();
-        }
+        aggiter.open();
     }
 
     /**

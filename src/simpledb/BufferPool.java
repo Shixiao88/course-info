@@ -67,7 +67,7 @@ public class BufferPool {
         HeapFile hp = (HeapFile)Database.getCatalog().getDbFile(pid.getTableId());
         Page noExistPage = hp.readPage(pid);
         if (pageList.size() < max_page_num) {
-            pageList.add(noExistPage);
+            pageList.add(pageList.size(), noExistPage);
             return noExistPage;
         } else {
             /*Eviction Policy afterwards */
@@ -178,8 +178,11 @@ public class BufferPool {
      *     break simpledb if running in NO STEAL mode.
      */
     public synchronized void flushAllPages() throws IOException {
-        // some code goes here
-        // not necessary for lab1
+        for (Page p : pageList) {
+            if (p.isDirty() != null) {
+                flushPage(p.getId());
+            }
+        }
 
     }
 
@@ -198,8 +201,20 @@ public class BufferPool {
      * @param pid an ID indicating the page to flush
      */
     private synchronized  void flushPage(PageId pid) throws IOException {
-        // some code goes here
-        // not necessary for lab1
+        HeapFile hf = (HeapFile)Database.getCatalog().getDbFile(pid.getTableId());
+        int pagenum = pid.pageNumber();
+        File file = hf.getFile();
+        RandomAccessFile raf = new RandomAccessFile(file, "rw");
+        raf.seek((long)PAGE_SIZE * pagenum);
+        HeapPage targetPage = new HeapPage((HeapPageId)pid, new byte[0]);
+        for (Page hp : pageList) {
+            if (hp.getId().equals(pid) && hp.isDirty() != null) {
+                targetPage = (HeapPage) hp;
+                break;
+            }
+        }
+        raf.write(targetPage.getPageData());
+        raf.close();
     }
 
     /** Write all pages of the specified transaction to disk.
@@ -212,10 +227,20 @@ public class BufferPool {
     /**
      * Discards a page from the buffer pool.
      * Flushes the page to disk to ensure dirty pages are updated on disk.
+     * Eviction Policy :
+     *  LRU
+     *  implementation detail:
+     *  FIFO for arraylist.
      */
     private synchronized  void evictPage() throws DbException {
-        // some code goes here
-        // not necessary for lab1
+        HeapPage removePage = (HeapPage)pageList.remove(0);
+        if (removePage.isDirty() != null) {
+            try {
+                flushPage(removePage.getId());
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
     }
 
 }
