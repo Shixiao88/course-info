@@ -53,7 +53,7 @@ public class HeapPage implements Page {
 
         // allocate and read the header slots of this page
         header = new byte[getHeaderSize()];
-        for (int i=0; i < header.length; i++) {
+        for (int i = 0; i < header.length; i++) {
             header[i] = dis.readByte();
         }
         this.realTupleNum = numTuple - getNumEmptySlots();
@@ -370,14 +370,17 @@ public class HeapPage implements Page {
         }
 
         public boolean hasNext() {
-            while (!isSlotUsed(index)) {
-                if (index < tuplelen - 1) {
+            while (index < (tuplelen - 2)) {
+                if (!(isSlotUsed(index))) {
                     index ++;
                 } else {
-                    return false;
+                    return true;
                 }
             }
-            return true;
+            if (index < tuplelen && isSlotUsed(index)) {
+                return true;
+            }
+            return false;
         }
 
         public Tuple next() {

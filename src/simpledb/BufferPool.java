@@ -71,7 +71,9 @@ public class BufferPool {
             return noExistPage;
         } else {
             /*Eviction Policy afterwards */
-            throw new DbException("right now do not have eviction policy, buffer full. ");
+            evictPage();
+            pageList.add(pageList.size(), noExistPage);
+            return noExistPage;
         }
     }
 
@@ -206,15 +208,14 @@ public class BufferPool {
         File file = hf.getFile();
         RandomAccessFile raf = new RandomAccessFile(file, "rw");
         raf.seek((long)PAGE_SIZE * pagenum);
-        HeapPage targetPage = new HeapPage((HeapPageId)pid, new byte[0]);
         for (Page hp : pageList) {
             if (hp.getId().equals(pid) && hp.isDirty() != null) {
-                targetPage = (HeapPage) hp;
-                break;
+                HeapPage targetPage = (HeapPage) hp;
+                raf.write((targetPage.getPageData()));
+                raf.close();
+                return;
             }
         }
-        raf.write(targetPage.getPageData());
-        raf.close();
     }
 
     /** Write all pages of the specified transaction to disk.

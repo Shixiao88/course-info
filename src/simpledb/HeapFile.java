@@ -147,6 +147,7 @@ public class HeapFile implements DbFile {
         PageId pid = t.getRecordId().getPageId();
         HeapPage page = (HeapPage)Database.getBufferPool().getPage(tid, pid, Permissions.READ_WRITE);
         page.deleteTuple(t);
+        /*
         byte[] b = page.getPageData();
         try {
             int pno = pid.pageNumber();
@@ -157,7 +158,7 @@ public class HeapFile implements DbFile {
         } catch (IOException e) {
             e.printStackTrace();
             return null;
-        }
+        }*/
         return page;
     }
 

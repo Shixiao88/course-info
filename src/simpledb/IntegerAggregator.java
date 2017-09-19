@@ -5,6 +5,7 @@ import org.omg.CORBA.INTF_REPOS;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.ListIterator;
+import java.util.Map;
 
 /**
  * Knows how to compute some aggregate over a set of IntFields.
@@ -14,7 +15,9 @@ public class IntegerAggregator implements Aggregator {
     private final int afield;
     private final Type gbfieldtype;
     private final Op op;
-    private ArrayList<Tuple> tuplelist;
+    private ArrayList<int[]> intlist;
+    private boolean needGroup;
+    private TupleDesc restd;
 
     /**
      * Aggregate constructor
@@ -29,7 +32,7 @@ public class IntegerAggregator implements Aggregator {
         this.afield = afield;
         this.gbfieldtype = gbfieldtype;
         this.op = what;
-        tuplelist = new ArrayList<>();
+        intlist = new ArrayList<>();
     }
 
     /**
@@ -37,10 +40,35 @@ public class IntegerAggregator implements Aggregator {
      * @param tup the Tuple containing an aggregate field and a group-by field
      */
     public void mergeTupleIntoGroup(Tuple tup) {
-        boolean hasGroup = false;
-        TupleDesc globalTupleDecs = tup.getTupleDesc();
         int groupedVal = 1;
         int groupedIndex = 0;
+        int groupedValTuple = ((IntField)tup.getField(afield)).getValue();
+        if (gbfindex == Aggregator.NO_GROUPING) {
+           needGroup = false;
+           for (int[] ints : intlist) {
+               merge(ints, 0, ints[groupedVal], groupedValTuple, op);
+               return;
+           }
+           int[] ints = new int[3];
+           merge(ints, groupedValTuple, op);
+           intlist.add(ints);
+        } else {
+            needGroup = true;
+            int groupedInTuple = ((IntField) tup.getField(gbfindex)).getValue();
+            for (int[] ints : intlist) {
+                if (ints[groupedIndex] == groupedInTuple) {
+                    merge(ints, groupedInTuple, ints[groupedVal], groupedValTuple, op);
+                    return;
+                }
+            }
+            int[] ints = new int[3];
+            merge(ints, groupedInTuple, groupedValTuple, op);
+            intlist.add(ints);
+            return;
+        }
+
+
+        /*
         if (tuplelist.size() == 0 ) {
             if (op == Op.COUNT) {
                 TupleDesc restd = new TupleDesc(new Type[]{globalTupleDecs.getFieldType(gbfindex), Type.INT_TYPE});
@@ -101,6 +129,45 @@ public class IntegerAggregator implements Aggregator {
                     tuplelist.add(res);
                 }
             }
+        }*/
+    }
+
+    private void merge(int[] ints, int val, Op op) {
+        merge(ints, 0, val, op);
+    }
+
+    private void merge(int[] ints, int groupindex, int val, Op op) {
+        ints[0] = groupindex;
+        ints[1] = val;
+        ints[2] = 1;
+        if (op.equals(Op.COUNT)) {
+            ints[1] = 1;
+        }
+    }
+
+    private void merge(int[] ints, int groupindex, int val1, int val2, Op op) {
+        switch (op) {
+            case MAX:
+                ints[0] = groupindex;
+                ints[1] = Math.max(val1, val2);
+                break;
+            case MIN:
+                ints[0] = groupindex;
+                ints[1] = Math.min(val1, val2);
+                break;
+            case SUM:
+                ints[0] = groupindex;
+                ints[1] = val1 + val2;
+                break;
+            case COUNT:
+                ints[0] = groupindex;
+                ints[1] += 1;
+                break;
+            case AVG:
+                ints[0] = groupindex;
+                ints[1] = val1 + val2;
+                ints[2] += 1;
+                break;
         }
     }
 
@@ -117,13 +184,14 @@ public class IntegerAggregator implements Aggregator {
     }
 
     private class AggIterator implements DbIterator{
-        private Iterator<Tuple> agit;
+        private Iterator<int[]> agit;
         private boolean isopen;
         private TupleDesc td;
 
         public AggIterator() {
             isopen = false;
-            agit = tuplelist.iterator();
+            agit = intlist.iterator();
+            restd = getTupleDesc();
         }
 
         public void open() {
@@ -133,6 +201,7 @@ public class IntegerAggregator implements Aggregator {
         @Override
         public boolean hasNext() throws IllegalStateException {
             if (isopen) {
+                int l = intlist.size();
                 return agit.hasNext();
             } else {
                 throw new IllegalStateException ("the iterator is not opened");
@@ -142,8 +211,26 @@ public class IntegerAggregator implements Aggregator {
         @Override
         public Tuple next() throws  IllegalStateException {
             if (isopen) {
-                int lendebug  = tuplelist.size();
-                return agit.next();
+                int[] i = agit.next();
+                Tuple nextTuple;
+                if (op.equals(Op.AVG)) {
+                    nextTuple = new Tuple(restd);
+                    if (needGroup) {
+                        nextTuple.setField(0, new IntField(i[0]));
+                        nextTuple.setField(1, new IntField(i[1] / i[2]));
+                    } else {
+                        nextTuple.setField(0, new IntField(i[1]/i[2]));
+                    }
+                } else {
+                    nextTuple = new Tuple(restd);
+                    if (needGroup) {
+                        nextTuple.setField(0, new IntField(i[0]));
+                        nextTuple.setField(1, new IntField(i[1]));
+                    } else {
+                        nextTuple.setField(0, new IntField(i[1]));
+                    }
+                }
+                return nextTuple;
             } else {
                 throw new IllegalStateException("the iterator is not opened");
             }
@@ -152,7 +239,7 @@ public class IntegerAggregator implements Aggregator {
         @Override
         public void rewind() throws IllegalStateException {
             if (isopen) {
-                agit = tuplelist.iterator();
+                agit = intlist.iterator();
             } else {
                 throw new IllegalStateException("the iterator is not opened");
             }
@@ -160,7 +247,10 @@ public class IntegerAggregator implements Aggregator {
 
         @Override
         public TupleDesc getTupleDesc() {
-            return tuplelist.get(0).getTupleDesc();
+            if (needGroup) {
+                return new TupleDesc(new Type[]{gbfieldtype, Type.INT_TYPE});
+            }
+            return new TupleDesc(new Type[]{Type.INT_TYPE});
         }
 
         @Override
