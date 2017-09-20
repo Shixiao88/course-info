@@ -6,12 +6,11 @@
       <sourceFolder url="file://$MODULE_DIR$/src" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/test" isTestSource="true" />
     </content>
-    <orderEntry type="inheritedJdk" />
+    <orderEntry type="jdk" jdkName="1.8" jdkType="JavaSDK" />
     <orderEntry type="sourceFolder" forTests="false" />
     <orderEntry type="library" name="lib" level="project" />
     <orderEntry type="library" name="bin" level="project" />
     <orderEntry type="library" name=".mylyn" level="project" />
-    <orderEntry type="library" name="javalib" level="project" />
     <orderEntry type="library" name="index-0.0.0" level="project" />
     <orderEntry type="library" name="lib1" level="project" />
     <orderEntry type="library" name="ant-contrib-1.0b3" level="project" />

@@ -58,6 +58,9 @@ public class DbFileIter implements DbFileIterator {
                 return true;
             }
             pageIndexInThisFile ++;
+            if (pageIndexInThisFile == f.numPages()) {
+                return false;
+            }
             HeapPage nextpage = (HeapPage)Database.getBufferPool().getPage(
                     tid, new HeapPageId(fileId, pageIndexInThisFile), Permissions.READ_ONLY);
             iter = nextpage.iterator();

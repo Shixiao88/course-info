@@ -1,7 +1,5 @@
 package simpledb;
 
-import jdk.internal.org.objectweb.asm.util.TraceAnnotationVisitor;
-
 import java.util.*;
 
 /**

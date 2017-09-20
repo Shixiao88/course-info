@@ -1,12 +1,8 @@
 package simpledb;
 
-import com.sun.corba.se.impl.ior.OldJIDLObjectKeyTemplate;
-import com.sun.xml.internal.ws.util.Pool;
 
 import java.io.Serializable;
-import java.lang.reflect.Array;
 import java.util.*;
-import java.util.Arrays;
 
 /**
  * TupleDesc describes the schema of a tuple.
