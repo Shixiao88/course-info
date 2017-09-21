@@ -122,11 +122,11 @@ public class HeapFile implements DbFile {
                 //find a page with empty slot, insert into this empty slot and write to the file
                 heapPage.insertTuple(t);
                 insertPages.add(heapPage);
-                RandomAccessFile raf = new RandomAccessFile(file, "rw");
+                /*RandomAccessFile raf = new RandomAccessFile(file, "rw");
                 raf.seek((long)i * BufferPool.getPageSize());
                 raf.write(heapPage.getPageData());
                 raf.close();
-                return insertPages;
+                return insertPages;*/
             } catch (DbException e) {
                 continue;
             }
@@ -136,22 +136,25 @@ public class HeapFile implements DbFile {
         HeapPage hp = new HeapPage(new HeapPageId(getId(), pno + 1), newEmptyData);
         hp.insertTuple(t);
         insertPages.add(hp);
-        try {
+        /*try {
             FileOutputStream fout = new FileOutputStream(file, true);
             fout.write(hp.getPageData());
             fout.close();
             return insertPages;
         } catch (IOException e) {
             throw e;
-        }
+        }*/
+        return insertPages;
     }
 
     // see DbFile.java for javadocs
-    public Page deleteTuple(TransactionId tid, Tuple t) throws DbException,
-        TransactionAbortedException {
+    public ArrayList<Page> deleteTuple(TransactionId tid, Tuple t) throws DbException,
+        TransactionAbortedException, IOException {
         PageId pid = t.getRecordId().getPageId();
+        ArrayList<Page> deletedPages = new ArrayList<>();
         HeapPage page = (HeapPage)Database.getBufferPool().getPage(tid, pid, Permissions.READ_WRITE);
         page.deleteTuple(t);
+        deletedPages.add(page);
         /*
         byte[] b = page.getPageData();
         try {
@@ -164,7 +167,7 @@ public class HeapFile implements DbFile {
             e.printStackTrace();
             return null;
         }*/
-        return page;
+        return deletedPages;
     }
 
     // see DbFile.java for javadocs
