@@ -20,8 +20,7 @@ public class DbFileIter implements DbFileIterator {
     private HeapFile f;
     private HeapPageId initialId;
 
-    public DbFileIter(TransactionId tid, int tableId)
-            throws DbException, TransactionAbortedException {
+    public DbFileIter(TransactionId tid, int tableId) {
         try {
             this.tid = tid;
             this.fileId = tableId;

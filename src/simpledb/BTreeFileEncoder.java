@@ -70,7 +70,7 @@ public class BTreeFileEncoder {
 
 		try {
 			TransactionId tid = new TransactionId();
-			DbFileIterator it = Database.getCatalog().getDatabaseFile(heapf.getId()).iterator(tid);
+			DbFileIterator it = Database.getCatalog().getDbFile(heapf.getId()).iterator(tid);
 			it.open();
 			int count = 0;
 			Transaction t = new Transaction();
@@ -206,7 +206,7 @@ public class BTreeFileEncoder {
 		// read all the tuples from the heap file and sort them on the keyField
 		ArrayList<Tuple> tuples = new ArrayList<Tuple>();
 		TransactionId tid = new TransactionId();
-		DbFileIterator it = Database.getCatalog().getDatabaseFile(heapf.getId()).iterator(tid);
+		DbFileIterator it = Database.getCatalog().getDbFile(heapf.getId()).iterator(tid);
 		it.open();
 		while (it.hasNext()) {
 			Tuple tup = it.next();

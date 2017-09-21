@@ -2,9 +2,7 @@ package simpledb;
 
 import java.io.*;
 import java.util.*;
-import java.nio.channels.FileChannel;
 
-import com.sun.xml.internal.ws.assembler.dev.TubelineAssemblyContextUpdater;
 import simpledb.Predicate.Op;
 
 /**

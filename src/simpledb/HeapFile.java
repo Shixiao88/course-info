@@ -171,13 +171,8 @@ public class HeapFile implements DbFile {
     }
 
     // see DbFile.java for javadocs
-    public DbFileIterator iterator(TransactionId tid) throws DbException, TransactionAbortedException {
-        try {
-            return new DbFileIter(tid, fileId);
-        } catch (DbException | TransactionAbortedException e) {
-            e.printStackTrace();
-            throw e;
-        }
+    public DbFileIterator iterator(TransactionId tid) {
+        return new DbFileIter(tid, fileId);
     }
 
 }

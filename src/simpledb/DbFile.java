@@ -62,11 +62,11 @@ public interface DbFile {
      *
      * @return an iterator over all the tuples stored in this DbFile.
      */
-    public DbFileIterator iterator(TransactionId tid) throws DbException, TransactionAbortedException;
+    public DbFileIterator iterator(TransactionId tid);
 
     /**
      * Returns a unique ID used to identify this DbFile in the Catalog. This id
-     * can be used to look up the table via {@link Catalog#getDatabaseFile} and
+     * can be used to look up the table via {@link Catalog#getDbFile} and
      * {@link Catalog#getTupleDesc}.
      * <p>
      * Implementation note:  you will need to generate this tableid somewhere,
