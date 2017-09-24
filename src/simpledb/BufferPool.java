@@ -21,6 +21,8 @@ public class BufferPool {
     /** Bytes per page, including header. */
     private static final int PAGE_SIZE = 4096;
 
+    private static int pageSize = PAGE_SIZE;
+
     /** Default number of pages passed to the constructor. This is used by
     other classes. BufferPool should use the numPages argument to the
     constructor instead. */
@@ -42,6 +44,16 @@ public class BufferPool {
       return PAGE_SIZE;
     }
 
+    // THIS FUNCTION SHOULD ONLY BE USED FOR TESTING!!
+    public static void setPageSize(int pageSize) {
+        BufferPool.pageSize = pageSize;
+    }
+
+    // THIS FUNCTION SHOULD ONLY BE USED FOR TESTING!!
+    public static void resetPageSize() {
+        BufferPool.pageSize = PAGE_SIZE;
+    }
+
     /**
      * Retrieve the specified page with the associated permissions.
      * Will acquire a lock and may block if that lock is held by another
@@ -57,15 +69,15 @@ public class BufferPool {
      * @param pid the ID of the requested page
      * @param perm the requested permissions on the page
      */
-    public  Page getPage(TransactionId tid, PageId pid, Permissions perm)
+    public Page getPage(TransactionId tid, PageId pid, Permissions perm)
         throws TransactionAbortedException, DbException {
         for (Page pg : pageList) {
             if (pg.getId().equals(pid)) {
                 return pg;
             }
         }
-        HeapFile hp = (HeapFile)Database.getCatalog().getDbFile(pid.getTableId());
-        Page noExistPage = hp.readPage(pid);
+        DbFile dbfile = Database.getCatalog().getDbFile(pid.getTableId());
+        Page noExistPage = dbfile.readPage(pid);
         if (pageList.size() < max_page_num) {
             pageList.add(pageList.size(), noExistPage);
             return noExistPage;

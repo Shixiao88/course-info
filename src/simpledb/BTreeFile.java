@@ -194,10 +194,23 @@ public class BTreeFile implements DbFile {
 	private BTreeLeafPage findLeafPage(TransactionId tid, HashMap<PageId, Page> dirtypages, BTreePageId pid, Permissions perm,
 			Field f) throws DbException, TransactionAbortedException {
 		// some code goes here
-        if (f == null) {
-
+		if (pid.pgcateg() == BTreePageId.LEAF) {
+			return (BTreeLeafPage)getPage(tid, dirtypages, pid, perm);
+		} else {
+			BTreeInternalPage internalPage = (BTreeInternalPage)getPage(tid, dirtypages, pid, perm);
+			Iterator<BTreeEntry> interiter = internalPage.iterator();
+			BTreeEntry nextEntry = new BTreeEntry(internalPage.getKey(1), null, null);
+			while (interiter.hasNext()) {
+				nextEntry = interiter.next();
+				if (f == null || f.compare(Op.LESS_THAN_OR_EQ, nextEntry.getKey())) {
+					return findLeafPage(tid, dirtypages, nextEntry.getLeftChild(), Permissions.READ_ONLY, f);
+				}
+			}
+			return findLeafPage(tid, dirtypages, nextEntry.getRightChild(), Permissions.READ_ONLY, f);
 		}
 	}
+
+
 
 	/**
 	 * Convenience method to find a leaf page when there is no dirtypages HashMap.
@@ -248,11 +261,45 @@ public class BTreeFile implements DbFile {
 		// the new entry.  getParentWithEmtpySlots() will be useful here.  Don't forget to update
 		// the sibling pointers of all the affected leaf pages.  Return the page into which a 
 		// tuple with the given key field should be inserted.
-return null;
+        BTreeLeafPage rightLeaf = (BTreeLeafPage)getEmptyPage(tid, dirtypages, BTreePageId.LEAF);
+        BTreeLeafPage leftLeaf = page;
+        int numLeftLeaf = page.getMaxTuples()/2;
+        int numRightLeaf = page.getMaxTuples() - numLeftLeaf;
+
+        // set the left-right siblings pointers
+        rightLeaf.setLeftSiblingId(leftLeaf.getId());
+        BTreeLeafPage rightrightLeaf = (BTreeLeafPage)getPage(tid, dirtypages, leftLeaf.getRightSiblingId(), Permissions.READ_WRITE);
+        rightLeaf.setRightSiblingId(rightrightLeaf.getId());
+        rightrightLeaf.setLeftSiblingId(rightLeaf.getId());
+        leftLeaf.setRightSiblingId(rightLeaf.getId());
+
+        // move half tuples from left page to right page
+        Iterator<Tuple> tupleiter = leftLeaf.reverseIterator();
+        for (int i = 0; i < numRightLeaf; i ++) {
+            Tuple tupleToMove = tupleiter.next();
+            leftLeaf.deleteTuple(tupleToMove);
+            rightLeaf.insertTuple(tupleToMove);
+        }
+
+        // the left page's maximum value is the tuple to copy into parent page
+        Tuple leftmin = leftLeaf.getTuple(0);
+        Tuple leftmax = leftLeaf.getTuple(numLeftLeaf - 1);
+        BTreeInternalPage parentpage = getParentWithEmptySlots(tid, dirtypages, leftLeaf.getParentId(), leftmax.getField(keyField));
+        leftLeaf.setParentId(parentpage.getId());
+        rightLeaf.setParentId(parentpage.getId());
+        // add the right page and left page into dirtypages
+        dirtypages.put(leftLeaf.getId(),leftLeaf);
+        dirtypages.put(rightLeaf.getId(), rightLeaf);
+        // if the field to insert in is in left page's range, return left page; else return right page.
+        if (field.compare(Op.GREATER_THAN_OR_EQ, leftmin.getField(keyField)) ||
+                field.compare(Op.LESS_THAN_OR_EQ, leftmax.getField(keyField))) {
+            return leftLeaf;
+        }
+        return rightLeaf;
 	}
-	
+
 	/**
-	 * Split an internal page to make room for new entries and recursively split its parent page
+	 * split an internal page to make room for new entries and recursively split its parent page
 	 * as needed to accommodate a new entry. The new entry for the parent should have a key matching 
 	 * the middle key in the original internal page being split (this key is "pushed up" to the parent). 
 	 * The child pointers of the new parent entry should point to the two internal pages resulting 
@@ -285,7 +332,34 @@ return null;
 		// the parent pointers of all the children moving to the new page.  updateParentPointers()
 		// will be useful here.  Return the page into which an entry with the given key field
 		// should be inserted.
-return null;
+        BTreeInternalPage leftpage = page;
+        BTreeInternalPage rightpage = (BTreeInternalPage)getEmptyPage(tid, dirtypages, BTreePageId.INTERNAL);
+
+        // move half of the tuples from left to right
+        int leftEntryNum = leftpage.getMaxEntries() / 2;
+        int rightEntryNum = leftpage.getMaxEntries() - leftEntryNum;
+        Iterator<BTreeEntry> entryiter = leftpage.reverseIterator();
+        for (int i = 0; i < rightEntryNum; i ++) {
+            BTreeEntry nextentry = entryiter.next();
+            leftpage.deleteKeyAndRightChild(nextentry);
+            leftpage.updateEntry(nextentry);
+            rightpage.insertEntry(nextentry);
+            rightpage.updateEntry(nextentry);
+            rightpage.
+        }
+
+        // find the max entry in the left page and push it to the parent
+        BTreeEntry entryToPush = entryiter.next();
+        leftpage.deleteKeyAndRightChild(entryToPush);
+        BTreeInternalPage parent = getParentWithEmptySlots(tid, dirtypages, leftpage.getParentId(), field);
+        leftpage.setParentId(parent.getId());
+        rightpage.setParentId(parent.getId());
+
+        // put into dirty page list
+        dirtypages.put(leftpage.getId(), leftpage);
+        dirtypages.put(rightpage.getId(), rightpage);
+
+
 	}
 	
 	/**
