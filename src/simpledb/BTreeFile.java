@@ -263,14 +263,20 @@ public class BTreeFile implements DbFile {
 		// tuple with the given key field should be inserted.
         BTreeLeafPage rightLeaf = (BTreeLeafPage)getEmptyPage(tid, dirtypages, BTreePageId.LEAF);
         BTreeLeafPage leftLeaf = page;
-        int numLeftLeaf = page.getMaxTuples()/2;
-        int numRightLeaf = page.getMaxTuples() - numLeftLeaf;
+        BTreePageId debugid = leftLeaf.getId();
+        int debug = page.getNumTuples();
+        int numRightLeaf = page.getMaxTuples()/2;
+        int numLeftLeaf = page.getMaxTuples() - numRightLeaf;
 
         // set the left-right siblings pointers
         rightLeaf.setLeftSiblingId(leftLeaf.getId());
-        BTreeLeafPage rightrightLeaf = (BTreeLeafPage)getPage(tid, dirtypages, leftLeaf.getRightSiblingId(), Permissions.READ_WRITE);
-        rightLeaf.setRightSiblingId(rightrightLeaf.getId());
-        rightrightLeaf.setLeftSiblingId(rightLeaf.getId());
+        if (leftLeaf.getRightSiblingId() != null) {
+			BTreeLeafPage rightrightLeaf = (BTreeLeafPage) getPage(tid, dirtypages, leftLeaf.getRightSiblingId(), Permissions.READ_WRITE);
+			rightLeaf.setRightSiblingId(rightrightLeaf.getId());
+			rightrightLeaf.setLeftSiblingId(rightLeaf.getId());
+		} else {
+        	rightLeaf.setRightSiblingId(null);
+		}
         leftLeaf.setRightSiblingId(rightLeaf.getId());
 
         // move half tuples from left page to right page
@@ -284,18 +290,23 @@ public class BTreeFile implements DbFile {
         // the left page's maximum value is the tuple to copy into parent page
         Tuple leftmin = leftLeaf.getTuple(0);
         Tuple leftmax = leftLeaf.getTuple(numLeftLeaf - 1);
+        BTreeEntry entryToCopy = new BTreeEntry(leftmax.getField(keyField), leftLeaf.getId(), rightLeaf.getId());
         BTreeInternalPage parentpage = getParentWithEmptySlots(tid, dirtypages, leftLeaf.getParentId(), leftmax.getField(keyField));
+        parentpage.insertEntry(entryToCopy);
+        parentpage.updateEntry(entryToCopy);
         leftLeaf.setParentId(parentpage.getId());
         rightLeaf.setParentId(parentpage.getId());
         // add the right page and left page into dirtypages
         dirtypages.put(leftLeaf.getId(),leftLeaf);
         dirtypages.put(rightLeaf.getId(), rightLeaf);
-        // if the field to insert in is in left page's range, return left page; else return right page.
+
+        return findLeafPage(tid, dirtypages, parentpage.getId(), Permissions.READ_WRITE, field);
+        /*// if the field to insert in is in left page's range, return left page; else return right page.
         if (field.compare(Op.GREATER_THAN_OR_EQ, leftmin.getField(keyField)) ||
                 field.compare(Op.LESS_THAN_OR_EQ, leftmax.getField(keyField))) {
             return leftLeaf;
         }
-        return rightLeaf;
+        return rightLeaf;*/
 	}
 
 	/**
@@ -336,30 +347,37 @@ public class BTreeFile implements DbFile {
         BTreeInternalPage rightpage = (BTreeInternalPage)getEmptyPage(tid, dirtypages, BTreePageId.INTERNAL);
 
         // move half of the tuples from left to right
-        int leftEntryNum = leftpage.getMaxEntries() / 2;
-        int rightEntryNum = leftpage.getMaxEntries() - leftEntryNum;
+        int rightEntryNum = leftpage.getMaxEntries() / 2;
+        int leftEntryNum = leftpage.getMaxEntries() - rightEntryNum;
         Iterator<BTreeEntry> entryiter = leftpage.reverseIterator();
         for (int i = 0; i < rightEntryNum; i ++) {
             BTreeEntry nextentry = entryiter.next();
             leftpage.deleteKeyAndRightChild(nextentry);
-            leftpage.updateEntry(nextentry);
+           // leftpage.updateEntry(nextentry);
             rightpage.insertEntry(nextentry);
-            rightpage.updateEntry(nextentry);
-            rightpage.
+            //rightpage.updateEntry(nextentry);
         }
 
-        // find the max entry in the left page and push it to the parent
+        // the middle entry is always the right most in left page
+		// add parent and children pointers
         BTreeEntry entryToPush = entryiter.next();
         leftpage.deleteKeyAndRightChild(entryToPush);
-        BTreeInternalPage parent = getParentWithEmptySlots(tid, dirtypages, leftpage.getParentId(), field);
-        leftpage.setParentId(parent.getId());
-        rightpage.setParentId(parent.getId());
+		entryToPush.setLeftChild(leftpage.getId());
+		entryToPush.setRightChild(rightpage.getId());
+		BTreeInternalPage parent = getParentWithEmptySlots(tid, dirtypages, leftpage.getParentId(), field);
+        parent.insertEntry(entryToPush);
+        updateParentPointers(tid, dirtypages, leftpage);
+        updateParentPointers(tid, dirtypages, rightpage);
 
         // put into dirty page list
         dirtypages.put(leftpage.getId(), leftpage);
         dirtypages.put(rightpage.getId(), rightpage);
 
-
+        // find correct range
+        if (field.compare(Op.LESS_THAN_OR_EQ, entryToPush.getKey())) {
+			return leftpage;
+		}
+		return rightpage;
 	}
 	
 	/**
@@ -650,7 +668,25 @@ public class BTreeFile implements DbFile {
         // Move some of the tuples from the sibling to the page so
 		// that the tuples are evenly distributed. Be sure to update
 		// the corresponding parent entry.
-
+        int numtuplepage = page.getNumTuples();
+        int numtuplesibl = sibling.getNumTuples();
+        int diff = (numtuplesibl - numtuplepage) / 2;
+        Iterator<Tuple> tupleiter;
+        if (isRightSibling) {
+            tupleiter = sibling.iterator();
+        } else {
+            tupleiter = sibling.reverseIterator();
+        }
+        Tuple toMove = new Tuple(page.getTuple(0).getTupleDesc());
+        for (int i = 0; i < diff; i ++) {
+            toMove = tupleiter.next();
+            sibling.deleteTuple(toMove);
+            page.insertTuple(toMove);
+        }
+        if (isRightSibling) { toMove = tupleiter.next();}
+        //Tuple tupleToCopy = tupleiter.next();
+        entry.setKey(toMove.getField(keyField));
+        parent.updateEntry(entry);
     }
 
 	/**

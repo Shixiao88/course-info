@@ -41,7 +41,7 @@ public class BufferPool {
     }
     
     public static int getPageSize() {
-      return PAGE_SIZE;
+      return BufferPool.pageSize;
     }
 
     // THIS FUNCTION SHOULD ONLY BE USED FOR TESTING!!
@@ -149,7 +149,7 @@ public class BufferPool {
      */
     public void insertTuple(TransactionId tid, int tableId, Tuple t)
         throws DbException, IOException, TransactionAbortedException {
-        HeapFile f = (HeapFile) Database.getCatalog().getDbFile(tableId);
+        DbFile f = Database.getCatalog().getDbFile(tableId);
         ArrayList<Page> plst = f.insertTuple(tid, t);
         for (Page p : plst) {
             p.markDirty(true, tid);
@@ -240,7 +240,7 @@ public class BufferPool {
      *  FIFO for arraylist.
      */
     private synchronized  void evictPage() throws DbException {
-        HeapPage removePage = (HeapPage)pageList.remove(0);
+        Page removePage = pageList.remove(0);
         if (removePage.isDirty() != null) {
             try {
                 flushPage(removePage.getId());
