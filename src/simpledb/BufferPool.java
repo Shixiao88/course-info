@@ -173,7 +173,7 @@ public class BufferPool {
     public void deleteTuple(TransactionId tid, Tuple t)
         throws DbException, IOException, TransactionAbortedException {
         int tableid = t.getRecordId().getPageId().getTableId();
-        HeapFile f = (HeapFile) Database.getCatalog().getDbFile(tableid);
+        DbFile f = Database.getCatalog().getDbFile(tableid);
         ArrayList<Page> plst = f.deleteTuple(tid, t);
         for (Page p : plst) {
             p.markDirty(true, tid);
@@ -209,17 +209,13 @@ public class BufferPool {
      * @param pid an ID indicating the page to flush
      */
     private synchronized  void flushPage(PageId pid) throws IOException {
-        HeapFile hf = (HeapFile)Database.getCatalog().getDbFile(pid.getTableId());
-        int pagenum = pid.pageNumber();
-        File file = hf.getFile();
-        RandomAccessFile raf = new RandomAccessFile(file, "rw");
-        raf.seek((long)PAGE_SIZE * pagenum);
-        for (Page hp : pageList) {
-            if (hp.getId().equals(pid) && hp.isDirty() != null) {
-                HeapPage targetPage = (HeapPage) hp;
-                raf.write((targetPage.getPageData()));
-                raf.close();
-                return;
+        for (Page pg : pageList) {
+            if (pg.getId().equals(pid)) {
+                if (pg.isDirty() != null) {
+                    DbFile hf = Database.getCatalog().getDbFile(pid.getTableId());
+                    hf.writePage(pg);
+                    pg.markDirty(false, null);
+                }
             }
         }
     }

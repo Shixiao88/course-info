@@ -2,8 +2,31 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="0c451e69-2312-45ae-94c8-4a17724641a2" name="Default" comment="">
+      <change type="DELETED" beforePath="$PROJECT_DIR$/out/test/Database/simpledb/BufferPoolWriteTest$HeapFileDuplicates.class" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/out/test/Database/simpledb/BufferPoolWriteTest.class" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/out/test/Database/simpledb/TestUtil$CreateHeapFile.class" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/out/test/Database/simpledb/TestUtil$LockGrabber.class" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/out/test/Database/simpledb/TestUtil$MockScan.class" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/out/test/Database/simpledb/TestUtil$SkeletonFile.class" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/out/test/Database/simpledb/TestUtil.class" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/out/test/Database/simpledb/systemtest/BTreeScanTest$InstrumentedBTreeFile.class" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/out/test/Database/simpledb/systemtest/BTreeScanTest$TupleComparator.class" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/out/test/Database/simpledb/systemtest/BTreeScanTest.class" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/out/test/Database/simpledb/systemtest/ScanTest$1InstrumentedHeapFile.class" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/out/test/Database/simpledb/systemtest/ScanTest.class" afterPath="" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/bin/src/simpledb/BTreeFile.class" afterPath="$PROJECT_DIR$/bin/src/simpledb/BTreeFile.class" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/bin/src/simpledb/BTreeFileIterator.class" afterPath="$PROJECT_DIR$/bin/src/simpledb/BTreeFileIterator.class" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/bin/src/simpledb/BTreeSearchIterator.class" afterPath="$PROJECT_DIR$/bin/src/simpledb/BTreeSearchIterator.class" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/bin/src/simpledb/BufferPool.class" afterPath="$PROJECT_DIR$/bin/src/simpledb/BufferPool.class" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/out/production/Database/simpledb/BTreeFile.class" afterPath="$PROJECT_DIR$/out/production/Database/simpledb/BTreeFile.class" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/out/production/Database/simpledb/BTreeFileIterator.class" afterPath="$PROJECT_DIR$/out/production/Database/simpledb/BTreeFileIterator.class" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/out/production/Database/simpledb/BTreeSearchIterator.class" afterPath="$PROJECT_DIR$/out/production/Database/simpledb/BTreeSearchIterator.class" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/out/production/Database/simpledb/BufferPool.class" afterPath="$PROJECT_DIR$/out/production/Database/simpledb/BufferPool.class" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/out/production/Database/simpledb/DbFile.class" afterPath="$PROJECT_DIR$/out/production/Database/simpledb/DbFile.class" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/simpledb/BTreeFile.java" afterPath="$PROJECT_DIR$/src/simpledb/BTreeFile.java" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/simpledb/BufferPool.java" afterPath="$PROJECT_DIR$/src/simpledb/BufferPool.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/simpledb/DbFile.java" afterPath="$PROJECT_DIR$/src/simpledb/DbFile.java" />
     </list>
     <ignored path="$PROJECT_DIR$/out/" />
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
@@ -27,11 +50,11 @@
   <component name="ExecutionTargetManager" SELECTED_TARGET="default_target" />
   <component name="FileEditorManager">
     <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
-      <file leaf-file-name="BTreeInternalPage.java" pinned="false" current-in-tab="false">
+      <file leaf-file-name="BTreeInternalPage.java" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/src/simpledb/BTreeInternalPage.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="90">
-              <caret line="464" column="0" lean-forward="false" selection-start-line="464" selection-start-column="0" selection-end-line="464" selection-end-column="0" />
+            <state relative-caret-position="884">
+              <caret line="429" column="11" lean-forward="false" selection-start-line="429" selection-start-column="11" selection-end-line="429" selection-end-column="11" />
               <folding />
             </state>
           </provider>
@@ -40,36 +63,81 @@
       <file leaf-file-name="BTreeEntry.java" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/src/simpledb/BTreeEntry.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="204">
-              <caret line="131" column="18" lean-forward="false" selection-start-line="131" selection-start-column="18" selection-end-line="131" selection-end-column="18" />
+            <state relative-caret-position="884">
+              <caret line="66" column="0" lean-forward="false" selection-start-line="66" selection-start-column="0" selection-end-line="66" selection-end-column="0" />
               <folding>
-                <element signature="e#1671#1672#0" expanded="true" />
                 <element signature="e#1694#1695#0" expanded="true" />
-                <element signature="e#1780#1781#0" expanded="true" />
-                <element signature="e#1804#1805#0" expanded="true" />
+                <element signature="e#2872#2873#0" expanded="true" />
+                <element signature="e#2905#2906#0" expanded="true" />
+                <element signature="e#3341#3342#0" expanded="true" />
+                <element signature="e#3376#3377#0" expanded="true" />
+                <element signature="e#3501#3502#0" expanded="true" />
+                <element signature="e#3522#3523#0" expanded="true" />
               </folding>
             </state>
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="BTreeFile.java" pinned="false" current-in-tab="true">
+      <file leaf-file-name="BTreeFile.java" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/src/simpledb/BTreeFile.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="171">
-              <caret line="685" column="12" lean-forward="false" selection-start-line="685" selection-start-column="12" selection-end-line="685" selection-end-column="12" />
+            <state relative-caret-position="-2108">
+              <caret line="5" column="28" lean-forward="false" selection-start-line="5" selection-start-column="28" selection-end-line="5" selection-end-column="28" />
               <folding>
-                <element signature="imports" expanded="true" />
+                <element signature="e#21246#21260#0" expanded="true" />
                 <element signature="e#22264#22270#0" expanded="true" />
+                <element signature="e#45302#45316#0" expanded="true" />
+                <element signature="e#45903#45909#0" expanded="true" />
               </folding>
             </state>
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="BTreeFileDeleteTest.java" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/test/simpledb/systemtest/BTreeFileDeleteTest.java">
+      <file leaf-file-name="TupleDesc.java" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/src/simpledb/TupleDesc.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="68">
-              <caret line="14" column="13" lean-forward="false" selection-start-line="14" selection-start-column="13" selection-end-line="14" selection-end-column="13" />
+            <state relative-caret-position="-884">
+              <caret line="9" column="13" lean-forward="false" selection-start-line="9" selection-start-column="13" selection-end-line="9" selection-end-column="13" />
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="Tuple.java" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/src/simpledb/Tuple.java">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="216">
+              <caret line="29" column="0" lean-forward="false" selection-start-line="29" selection-start-column="0" selection-end-line="29" selection-end-column="0" />
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="BufferPool.java" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/src/simpledb/BufferPool.java">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="284">
+              <caret line="217" column="16" lean-forward="false" selection-start-line="217" selection-start-column="16" selection-end-line="217" selection-end-column="16" />
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="DbFile.java" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/src/simpledb/DbFile.java">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="114">
+              <caret line="15" column="0" lean-forward="false" selection-start-line="15" selection-start-column="0" selection-end-line="15" selection-end-column="0" />
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="TestUtil.java" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/test/simpledb/TestUtil.java">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="43">
+              <caret line="195" column="18" lean-forward="false" selection-start-line="195" selection-start-column="18" selection-end-line="195" selection-end-column="18" />
               <folding />
             </state>
           </provider>
@@ -78,28 +146,18 @@
       <file leaf-file-name="BTreeFileDeleteTest.java" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/test/simpledb/BTreeFileDeleteTest.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="349">
-              <caret line="133" column="0" lean-forward="false" selection-start-line="133" selection-start-column="0" selection-end-line="133" selection-end-column="0" />
+            <state relative-caret-position="357">
+              <caret line="357" column="0" lean-forward="false" selection-start-line="357" selection-start-column="0" selection-end-line="357" selection-end-column="0" />
               <folding />
             </state>
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="BTreeLeafPage.java" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/src/simpledb/BTreeLeafPage.java">
+      <file leaf-file-name="BTreeUtility.java" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/src/simpledb/BTreeUtility.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="391">
-              <caret line="476" column="36" lean-forward="false" selection-start-line="476" selection-start-column="36" selection-end-line="476" selection-end-column="36" />
-              <folding />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="BTreePage.java" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/src/simpledb/BTreePage.java">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="114">
-              <caret line="85" column="0" lean-forward="false" selection-start-line="85" selection-start-column="0" selection-end-line="85" selection-end-column="0" />
+            <state relative-caret-position="109">
+              <caret line="338" column="0" lean-forward="false" selection-start-line="338" selection-start-column="0" selection-end-line="338" selection-end-column="0" />
               <folding />
             </state>
           </provider>
@@ -134,14 +192,15 @@
         <option value="$PROJECT_DIR$/src/simpledb/Query.java" />
         <option value="$PROJECT_DIR$/src/simpledb/Catalog.java" />
         <option value="$PROJECT_DIR$/src/simpledb/BTreeScan.java" />
-        <option value="$PROJECT_DIR$/src/simpledb/DbFile.java" />
         <option value="$PROJECT_DIR$/src/simpledb/HeapFile.java" />
         <option value="$PROJECT_DIR$/src/simpledb/DbFileIter.java" />
         <option value="$PROJECT_DIR$/src/simpledb/BTreeFileEncoder.java" />
         <option value="$PROJECT_DIR$/src/simpledb/Delete.java" />
         <option value="$PROJECT_DIR$/test/simpledb/TestUtil.java" />
-        <option value="$PROJECT_DIR$/src/simpledb/BufferPool.java" />
+        <option value="$PROJECT_DIR$/src/simpledb/BTreeInternalPage.java" />
         <option value="$PROJECT_DIR$/src/simpledb/BTreeFile.java" />
+        <option value="$PROJECT_DIR$/src/simpledb/DbFile.java" />
+        <option value="$PROJECT_DIR$/src/simpledb/BufferPool.java" />
       </list>
     </option>
   </component>
@@ -172,9 +231,9 @@
       <foldersAlwaysOnTop value="true" />
     </navigator>
     <panes>
+      <pane id="Scratches" />
       <pane id="Scope" />
       <pane id="PackagesPane" />
-      <pane id="Scratches" />
       <pane id="ProjectPane">
         <subPane>
           <PATH>
@@ -219,6 +278,24 @@
               <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
             </PATH_ELEMENT>
           </PATH>
+          <PATH>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="Database" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="Database" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="src" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="simpledb" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+          </PATH>
         </subPane>
       </pane>
     </panes>
@@ -233,60 +310,8 @@
     <property name="settings.editor.selected.configurable" value="reference.projectsettings.compiler.javacompiler" />
     <property name="js.eslint.eslintPackage" value="" />
   </component>
-  <component name="RunManager" selected="JUnit.BTreeFileDeleteTest.testStealFromLeftLeafPage">
-    <configuration default="false" name="BTreeFileReadTest" type="JUnit" factoryName="JUnit" temporary="true" nameIsGenerated="true">
-      <extension name="coverage" enabled="false" merge="false" sample_coverage="true" runner="idea">
-        <pattern>
-          <option name="PATTERN" value="simpledb.*" />
-          <option name="ENABLED" value="true" />
-        </pattern>
-      </extension>
-      <module name="Database" />
-      <option name="ALTERNATIVE_JRE_PATH_ENABLED" value="false" />
-      <option name="ALTERNATIVE_JRE_PATH" />
-      <option name="PACKAGE_NAME" value="simpledb" />
-      <option name="MAIN_CLASS_NAME" value="simpledb.BTreeFileReadTest" />
-      <option name="METHOD_NAME" />
-      <option name="TEST_OBJECT" value="class" />
-      <option name="VM_PARAMETERS" value="-ea" />
-      <option name="PARAMETERS" />
-      <option name="WORKING_DIRECTORY" value="$MODULE_DIR$" />
-      <option name="ENV_VARIABLES" />
-      <option name="PASS_PARENT_ENVS" value="true" />
-      <option name="TEST_SEARCH_SCOPE">
-        <value defaultName="singleModule" />
-      </option>
-      <envs />
-      <patterns />
-      <method />
-    </configuration>
-    <configuration default="false" name="BTreeFileInsertTest" type="JUnit" factoryName="JUnit" temporary="true" nameIsGenerated="true">
-      <extension name="coverage" enabled="false" merge="false" sample_coverage="true" runner="idea">
-        <pattern>
-          <option name="PATTERN" value="simpledb.*" />
-          <option name="ENABLED" value="true" />
-        </pattern>
-      </extension>
-      <module name="Database" />
-      <option name="ALTERNATIVE_JRE_PATH_ENABLED" value="false" />
-      <option name="ALTERNATIVE_JRE_PATH" />
-      <option name="PACKAGE_NAME" value="simpledb" />
-      <option name="MAIN_CLASS_NAME" value="simpledb.BTreeFileInsertTest" />
-      <option name="METHOD_NAME" />
-      <option name="TEST_OBJECT" value="class" />
-      <option name="VM_PARAMETERS" value="-ea" />
-      <option name="PARAMETERS" />
-      <option name="WORKING_DIRECTORY" value="$MODULE_DIR$" />
-      <option name="ENV_VARIABLES" />
-      <option name="PASS_PARENT_ENVS" value="true" />
-      <option name="TEST_SEARCH_SCOPE">
-        <value defaultName="singleModule" />
-      </option>
-      <envs />
-      <patterns />
-      <method />
-    </configuration>
-    <configuration default="false" name="BTreeFileInsertTest.testSplitInternalPage" type="JUnit" factoryName="JUnit" temporary="true" nameIsGenerated="true">
+  <component name="RunManager" selected="JUnit.BTreeHeaderPageTest">
+    <configuration default="false" name="BTreeFileDeleteTest (1)" type="JUnit" factoryName="JUnit" temporary="true" nameIsGenerated="true">
       <extension name="coverage" enabled="false" merge="false" sample_coverage="true" runner="idea">
         <pattern>
           <option name="PATTERN" value="simpledb.systemtest.*" />
@@ -297,9 +322,9 @@
       <option name="ALTERNATIVE_JRE_PATH_ENABLED" value="false" />
       <option name="ALTERNATIVE_JRE_PATH" />
       <option name="PACKAGE_NAME" value="simpledb.systemtest" />
-      <option name="MAIN_CLASS_NAME" value="simpledb.systemtest.BTreeFileInsertTest" />
-      <option name="METHOD_NAME" value="testSplitInternalPage" />
-      <option name="TEST_OBJECT" value="method" />
+      <option name="MAIN_CLASS_NAME" value="simpledb.systemtest.BTreeFileDeleteTest" />
+      <option name="METHOD_NAME" />
+      <option name="TEST_OBJECT" value="class" />
       <option name="VM_PARAMETERS" value="-ea" />
       <option name="PARAMETERS" />
       <option name="WORKING_DIRECTORY" value="$MODULE_DIR$" />
@@ -312,7 +337,7 @@
       <patterns />
       <method />
     </configuration>
-    <configuration default="false" name="BTreeFileDeleteTest" type="JUnit" factoryName="JUnit" temporary="true" nameIsGenerated="true">
+    <configuration default="false" name="BTreeFileDeleteTest (2)" type="JUnit" factoryName="JUnit" temporary="true" nameIsGenerated="true">
       <extension name="coverage" enabled="false" merge="false" sample_coverage="true" runner="idea">
         <pattern>
           <option name="PATTERN" value="simpledb.*" />
@@ -338,7 +363,7 @@
       <patterns />
       <method />
     </configuration>
-    <configuration default="false" name="BTreeFileDeleteTest.testStealFromLeftLeafPage" type="JUnit" factoryName="JUnit" temporary="true" nameIsGenerated="true">
+    <configuration default="false" name="BTreeFileDeleteTest.testMergeInternalPages" type="JUnit" factoryName="JUnit" temporary="true" nameIsGenerated="true">
       <extension name="coverage" enabled="false" merge="false" sample_coverage="true" runner="idea">
         <pattern>
           <option name="PATTERN" value="simpledb.*" />
@@ -350,8 +375,60 @@
       <option name="ALTERNATIVE_JRE_PATH" />
       <option name="PACKAGE_NAME" value="simpledb" />
       <option name="MAIN_CLASS_NAME" value="simpledb.BTreeFileDeleteTest" />
-      <option name="METHOD_NAME" value="testStealFromLeftLeafPage" />
+      <option name="METHOD_NAME" value="testMergeInternalPages" />
       <option name="TEST_OBJECT" value="method" />
+      <option name="VM_PARAMETERS" value="-ea" />
+      <option name="PARAMETERS" />
+      <option name="WORKING_DIRECTORY" value="$MODULE_DIR$" />
+      <option name="ENV_VARIABLES" />
+      <option name="PASS_PARENT_ENVS" value="true" />
+      <option name="TEST_SEARCH_SCOPE">
+        <value defaultName="singleModule" />
+      </option>
+      <envs />
+      <patterns />
+      <method />
+    </configuration>
+    <configuration default="false" name="BTreeFileDeleteTest.testRedistributeInternalPages" type="JUnit" factoryName="JUnit" temporary="true" nameIsGenerated="true">
+      <extension name="coverage" enabled="false" merge="false" sample_coverage="true" runner="idea">
+        <pattern>
+          <option name="PATTERN" value="simpledb.systemtest.*" />
+          <option name="ENABLED" value="true" />
+        </pattern>
+      </extension>
+      <module name="Database" />
+      <option name="ALTERNATIVE_JRE_PATH_ENABLED" value="false" />
+      <option name="ALTERNATIVE_JRE_PATH" />
+      <option name="PACKAGE_NAME" value="simpledb.systemtest" />
+      <option name="MAIN_CLASS_NAME" value="simpledb.systemtest.BTreeFileDeleteTest" />
+      <option name="METHOD_NAME" value="testRedistributeInternalPages" />
+      <option name="TEST_OBJECT" value="method" />
+      <option name="VM_PARAMETERS" value="-ea" />
+      <option name="PARAMETERS" />
+      <option name="WORKING_DIRECTORY" value="$MODULE_DIR$" />
+      <option name="ENV_VARIABLES" />
+      <option name="PASS_PARENT_ENVS" value="true" />
+      <option name="TEST_SEARCH_SCOPE">
+        <value defaultName="singleModule" />
+      </option>
+      <envs />
+      <patterns />
+      <method />
+    </configuration>
+    <configuration default="false" name="BTreeHeaderPageTest" type="JUnit" factoryName="JUnit" temporary="true" nameIsGenerated="true">
+      <extension name="coverage" enabled="false" merge="false" sample_coverage="true" runner="idea">
+        <pattern>
+          <option name="PATTERN" value="simpledb.*" />
+          <option name="ENABLED" value="true" />
+        </pattern>
+      </extension>
+      <module name="Database" />
+      <option name="ALTERNATIVE_JRE_PATH_ENABLED" value="false" />
+      <option name="ALTERNATIVE_JRE_PATH" />
+      <option name="PACKAGE_NAME" value="simpledb" />
+      <option name="MAIN_CLASS_NAME" value="simpledb.BTreeHeaderPageTest" />
+      <option name="METHOD_NAME" />
+      <option name="TEST_OBJECT" value="class" />
       <option name="VM_PARAMETERS" value="-ea" />
       <option name="PARAMETERS" />
       <option name="WORKING_DIRECTORY" value="$MODULE_DIR$" />
@@ -748,19 +825,19 @@
       <method />
     </configuration>
     <list size="5">
-      <item index="0" class="java.lang.String" itemvalue="JUnit.BTreeFileReadTest" />
-      <item index="1" class="java.lang.String" itemvalue="JUnit.BTreeFileInsertTest" />
-      <item index="2" class="java.lang.String" itemvalue="JUnit.BTreeFileInsertTest.testSplitInternalPage" />
-      <item index="3" class="java.lang.String" itemvalue="JUnit.BTreeFileDeleteTest" />
-      <item index="4" class="java.lang.String" itemvalue="JUnit.BTreeFileDeleteTest.testStealFromLeftLeafPage" />
+      <item index="0" class="java.lang.String" itemvalue="JUnit.BTreeFileDeleteTest (1)" />
+      <item index="1" class="java.lang.String" itemvalue="JUnit.BTreeFileDeleteTest (2)" />
+      <item index="2" class="java.lang.String" itemvalue="JUnit.BTreeFileDeleteTest.testMergeInternalPages" />
+      <item index="3" class="java.lang.String" itemvalue="JUnit.BTreeFileDeleteTest.testRedistributeInternalPages" />
+      <item index="4" class="java.lang.String" itemvalue="JUnit.BTreeHeaderPageTest" />
     </list>
     <recent_temporary>
       <list size="5">
-        <item index="0" class="java.lang.String" itemvalue="JUnit.BTreeFileDeleteTest" />
-        <item index="1" class="java.lang.String" itemvalue="JUnit.BTreeFileDeleteTest.testStealFromLeftLeafPage" />
-        <item index="2" class="java.lang.String" itemvalue="JUnit.BTreeFileInsertTest" />
-        <item index="3" class="java.lang.String" itemvalue="JUnit.BTreeFileInsertTest.testSplitInternalPage" />
-        <item index="4" class="java.lang.String" itemvalue="JUnit.BTreeFileReadTest" />
+        <item index="0" class="java.lang.String" itemvalue="JUnit.BTreeHeaderPageTest" />
+        <item index="1" class="java.lang.String" itemvalue="JUnit.BTreeFileDeleteTest.testRedistributeInternalPages" />
+        <item index="2" class="java.lang.String" itemvalue="JUnit.BTreeFileDeleteTest (1)" />
+        <item index="3" class="java.lang.String" itemvalue="JUnit.BTreeFileDeleteTest.testMergeInternalPages" />
+        <item index="4" class="java.lang.String" itemvalue="JUnit.BTreeFileDeleteTest (2)" />
       </list>
     </recent_temporary>
   </component>
@@ -793,44 +870,45 @@
       <workItem from="1505971505669" duration="12990000" />
       <workItem from="1506045072262" duration="5426000" />
       <workItem from="1506216205793" duration="18162000" />
-      <workItem from="1506304355687" duration="21995000" />
+      <workItem from="1506304355687" duration="22186000" />
+      <workItem from="1506387395160" duration="20498000" />
     </task>
     <servers />
   </component>
   <component name="TestHistory">
-    <history-entry file="BTreeFileDeleteTest - 2017.09.25 at 17h 47m 08s.xml">
-      <configuration name="BTreeFileDeleteTest" configurationId="JUnit" />
+    <history-entry file="BTreeFileDeleteTest_(1) - 2017.09.26 at 16h 25m 37s.xml">
+      <configuration name="BTreeFileDeleteTest (1)" configurationId="JUnit" />
     </history-entry>
-    <history-entry file="BTreeFileDeleteTest - 2017.09.25 at 17h 55m 01s.xml">
-      <configuration name="BTreeFileDeleteTest" configurationId="JUnit" />
+    <history-entry file="BTreeFileDeleteTest_(1) - 2017.09.26 at 16h 31m 37s.xml">
+      <configuration name="BTreeFileDeleteTest (1)" configurationId="JUnit" />
     </history-entry>
-    <history-entry file="BTreeFileDeleteTest - 2017.09.25 at 17h 58m 43s.xml">
-      <configuration name="BTreeFileDeleteTest" configurationId="JUnit" />
+    <history-entry file="BTreeFileDeleteTest_(1) - 2017.09.26 at 16h 33m 37s.xml">
+      <configuration name="BTreeFileDeleteTest (1)" configurationId="JUnit" />
     </history-entry>
-    <history-entry file="BTreeFileDeleteTest - 2017.09.25 at 17h 58m 58s.xml">
-      <configuration name="BTreeFileDeleteTest" configurationId="JUnit" />
+    <history-entry file="BTreeFileDeleteTest_testMergeInternalPages - 2017.09.26 at 15h 50m 58s.xml">
+      <configuration name="BTreeFileDeleteTest.testMergeInternalPages" configurationId="JUnit" />
     </history-entry>
-    <history-entry file="BTreeFileDeleteTest_testStealFromLeftLeafPage - 2017.09.25 at 17h 53m 13s.xml">
-      <configuration name="BTreeFileDeleteTest.testStealFromLeftLeafPage" configurationId="JUnit" />
+    <history-entry file="BTreeFileDeleteTest_testMergeInternalPages - 2017.09.26 at 15h 52m 51s.xml">
+      <configuration name="BTreeFileDeleteTest.testMergeInternalPages" configurationId="JUnit" />
     </history-entry>
-    <history-entry file="BTreeFileInsertTest - 2017.09.25 at 16h 24m 02s.xml">
-      <configuration name="BTreeFileInsertTest" configurationId="JUnit" />
+    <history-entry file="BTreeFileDeleteTest_testMergeInternalPages - 2017.09.26 at 15h 56m 34s.xml">
+      <configuration name="BTreeFileDeleteTest.testMergeInternalPages" configurationId="JUnit" />
     </history-entry>
-    <history-entry file="BTreeFileInsertTest - 2017.09.25 at 16h 24m 33s.xml">
-      <configuration name="BTreeFileInsertTest" configurationId="JUnit" />
+    <history-entry file="BTreeFileDeleteTest_testMergeInternalPages - 2017.09.26 at 15h 57m 19s.xml">
+      <configuration name="BTreeFileDeleteTest.testMergeInternalPages" configurationId="JUnit" />
     </history-entry>
-    <history-entry file="BTreeFileInsertTest_testSplitInternalPage - 2017.09.25 at 16h 09m 13s.xml">
-      <configuration name="BTreeFileInsertTest.testSplitInternalPage" configurationId="JUnit" />
+    <history-entry file="BTreeFileDeleteTest_testMergeInternalPages - 2017.09.26 at 16h 17m 04s.xml">
+      <configuration name="BTreeFileDeleteTest.testMergeInternalPages" configurationId="JUnit" />
     </history-entry>
-    <history-entry file="BTreeFileInsertTest_testSplitInternalPage - 2017.09.25 at 16h 23m 42s.xml">
-      <configuration name="BTreeFileInsertTest.testSplitInternalPage" configurationId="JUnit" />
+    <history-entry file="BTreeFileDeleteTest_testMergeInternalPages - 2017.09.26 at 16h 23m 18s.xml">
+      <configuration name="BTreeFileDeleteTest.testMergeInternalPages" configurationId="JUnit" />
     </history-entry>
-    <history-entry file="BTreeFileReadTest - 2017.09.25 at 16h 23m 12s.xml">
-      <configuration name="BTreeFileReadTest" configurationId="JUnit" />
+    <history-entry file="BTreeHeaderPageTest - 2017.09.26 at 17h 02m 13s.xml">
+      <configuration name="BTreeHeaderPageTest" configurationId="JUnit" />
     </history-entry>
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="220332000" />
+    <option name="totallyTimeSpent" value="241021000" />
   </component>
   <component name="TodoView">
     <todo-panel id="selected-file">
@@ -843,7 +921,7 @@
   </component>
   <component name="ToolWindowManager">
     <frame x="-8" y="-8" width="1382" height="744" extended-state="6" />
-    <editor active="true" />
+    <editor active="false" />
     <layout>
       <window_info id="Palette" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="Nl-Palette" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
@@ -855,20 +933,20 @@
       <window_info id="Designer" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="4" side_tool="false" content_ui="tabs" />
       <window_info id="Database" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32928804" sideWeight="0.5" order="6" side_tool="false" content_ui="tabs" />
       <window_info id="Structure" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
-      <window_info id="Ant Build" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.19174758" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
+      <window_info id="Ant Build" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.1913767" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
       <window_info id="UI Designer" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="5" side_tool="false" content_ui="tabs" />
-      <window_info id="Debug" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.4680851" sideWeight="0.5" order="4" side_tool="false" content_ui="tabs" />
+      <window_info id="Debug" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.3715221" sideWeight="0.5" order="4" side_tool="false" content_ui="tabs" />
       <window_info id="TODO" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.3272059" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="Messages" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.48772505" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
       <window_info id="Palette&#9;" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="9" side_tool="false" content_ui="tabs" />
       <window_info id="Image Layers" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="Capture Analysis" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="Version Control" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.3290441" sideWeight="0.5" order="9" side_tool="false" content_ui="tabs" />
-      <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.3420622" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
+      <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.3878887" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="CheckStyle" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.3290441" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="Style Checker" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="10" side_tool="false" content_ui="tabs" />
       <window_info id="Terminal" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.5496324" sideWeight="0.5" order="11" side_tool="false" content_ui="tabs" />
-      <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.18986385" sideWeight="0.5" order="0" side_tool="false" content_ui="combo" />
+      <window_info id="Project" active="true" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.28895614" sideWeight="0.5" order="0" side_tool="false" content_ui="combo" />
       <window_info id="Theme Preview" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="8" side_tool="false" content_ui="tabs" />
       <window_info id="Favorites" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="6" side_tool="true" content_ui="tabs" />
       <window_info id="Cvs" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="5" side_tool="false" content_ui="tabs" />
@@ -995,13 +1073,13 @@
           <option name="timeStamp" value="380" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="java-line">
-          <url>file://$PROJECT_DIR$/src/simpledb/BTreeFile.java</url>
-          <line>670</line>
+          <url>file://$PROJECT_DIR$/test/simpledb/BTreeFileDeleteTest.java</url>
+          <line>337</line>
           <properties />
-          <option name="timeStamp" value="383" />
+          <option name="timeStamp" value="402" />
         </line-breakpoint>
       </breakpoints>
-      <option name="time" value="386" />
+      <option name="time" value="403" />
     </breakpoint-manager>
     <watches-manager>
       <configuration name="JUnit">
@@ -1121,16 +1199,6 @@
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/src/java/simpledb/Aggregate.java" />
-    <entry file="file://$PROJECT_DIR$/src/simpledb/TupleDesc.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="34">
-          <caret line="2" column="0" lean-forward="false" selection-start-line="2" selection-start-column="0" selection-end-line="2" selection-end-column="0" />
-          <folding>
-            <element signature="imports" expanded="false" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/test/simpledb/systemtest/SimpleDbTestBase.java">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="153">
@@ -1191,25 +1259,10 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/simpledb/DbFile.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="276">
-          <caret line="64" column="53" lean-forward="false" selection-start-line="64" selection-start-column="53" selection-end-line="64" selection-end-column="53" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/src/simpledb/Delete.java">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="233">
           <caret line="62" column="35" lean-forward="false" selection-start-line="62" selection-start-column="35" selection-end-line="62" selection-end-column="35" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/test/simpledb/TestUtil.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="67">
-          <caret line="221" column="30" lean-forward="false" selection-start-line="221" selection-start-column="30" selection-end-line="221" selection-end-column="30" />
-          <folding />
         </state>
       </provider>
     </entry>
@@ -1269,10 +1322,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="99">
           <caret line="245" column="0" lean-forward="false" selection-start-line="245" selection-start-column="0" selection-end-line="245" selection-end-column="0" />
-          <folding>
-            <element signature="e#6042#6043#0" expanded="true" />
-            <element signature="e#6102#6103#0" expanded="true" />
-          </folding>
         </state>
       </provider>
     </entry>
@@ -1314,15 +1363,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="136">
           <caret line="36" column="3" lean-forward="false" selection-start-line="36" selection-start-column="3" selection-end-line="36" selection-end-column="3" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/simpledb/BTreeUtility.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="148">
-          <caret line="113" column="0" lean-forward="false" selection-start-line="113" selection-start-column="0" selection-end-line="113" selection-end-column="0" />
-          <folding />
         </state>
       </provider>
     </entry>
@@ -1330,19 +1370,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="99">
           <caret line="39" column="0" lean-forward="false" selection-start-line="39" selection-start-column="0" selection-end-line="39" selection-end-column="0" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/simpledb/BTreePageId.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="82">
-          <caret line="40" column="0" lean-forward="false" selection-start-line="40" selection-start-column="0" selection-end-line="40" selection-end-column="0" />
-          <folding>
-            <element signature="e#868#869#0" expanded="true" />
-            <element signature="e#889#890#0" expanded="true" />
-            <element signature="e#1033#1034#0" expanded="true" />
-          </folding>
         </state>
       </provider>
     </entry>
@@ -1354,67 +1381,9 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/simpledb/BTreeEntry.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="204">
-          <caret line="131" column="18" lean-forward="false" selection-start-line="131" selection-start-column="18" selection-end-line="131" selection-end-column="18" />
-          <folding>
-            <element signature="e#1671#1672#0" expanded="true" />
-            <element signature="e#1694#1695#0" expanded="true" />
-            <element signature="e#1780#1781#0" expanded="true" />
-            <element signature="e#1804#1805#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="jar://$PROJECT_DIR$/lib/junit-4.5.jar!/org/junit/internal/runners/model/ReflectiveCallable.class">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="221">
-          <caret line="16" column="0" lean-forward="false" selection-start-line="16" selection-start-column="0" selection-end-line="16" selection-end-column="0" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/simpledb/BTreePage.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="114">
-          <caret line="85" column="0" lean-forward="false" selection-start-line="85" selection-start-column="0" selection-end-line="85" selection-end-column="0" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/simpledb/Tuple.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="114">
-          <caret line="92" column="0" lean-forward="false" selection-start-line="92" selection-start-column="0" selection-end-line="92" selection-end-column="0" />
-          <folding>
-            <element signature="imports" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/simpledb/BTreeInternalPage.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="90">
-          <caret line="464" column="0" lean-forward="false" selection-start-line="464" selection-start-column="0" selection-end-line="464" selection-end-column="0" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/simpledb/BufferPool.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="196">
-          <caret line="248" column="12" lean-forward="false" selection-start-line="248" selection-start-column="12" selection-end-line="248" selection-end-column="12" />
-          <folding>
-            <element signature="e#1332#1333#0" expanded="true" />
-            <element signature="e#1372#1373#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/src/simpledb/BTreeLeafPage.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="391">
+        <state relative-caret-position="7973">
           <caret line="476" column="36" lean-forward="false" selection-start-line="476" selection-start-column="36" selection-end-line="476" selection-end-column="36" />
           <folding />
         </state>
@@ -1428,22 +1397,125 @@
         </state>
       </provider>
     </entry>
+    <entry file="file://$PROJECT_DIR$/src/simpledb/BTreePage.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="109">
+          <caret line="63" column="0" lean-forward="false" selection-start-line="63" selection-start-column="0" selection-end-line="63" selection-end-column="0" />
+          <folding>
+            <element signature="e#2118#2119#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="jar://$PROJECT_DIR$/lib/junit-4.5.jar!/org/junit/internal/runners/model/ReflectiveCallable.class">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="187">
+          <caret line="17" column="0" lean-forward="false" selection-start-line="17" selection-start-column="0" selection-end-line="17" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/simpledb/BTreePageId.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="-198">
+          <caret line="24" column="0" lean-forward="false" selection-start-line="24" selection-start-column="0" selection-end-line="24" selection-end-column="0" />
+          <folding>
+            <element signature="e#1106#1107#0" expanded="true" />
+            <element signature="e#1127#1128#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/simpledb/BTreeEntry.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="884">
+          <caret line="66" column="0" lean-forward="false" selection-start-line="66" selection-start-column="0" selection-end-line="66" selection-end-column="0" />
+          <folding>
+            <element signature="e#1694#1695#0" expanded="true" />
+            <element signature="e#2872#2873#0" expanded="true" />
+            <element signature="e#2905#2906#0" expanded="true" />
+            <element signature="e#3341#3342#0" expanded="true" />
+            <element signature="e#3376#3377#0" expanded="true" />
+            <element signature="e#3501#3502#0" expanded="true" />
+            <element signature="e#3522#3523#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/simpledb/BTreeUtility.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="109">
+          <caret line="338" column="0" lean-forward="false" selection-start-line="338" selection-start-column="0" selection-end-line="338" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/test/simpledb/BTreeFileDeleteTest.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="349">
-          <caret line="133" column="0" lean-forward="false" selection-start-line="133" selection-start-column="0" selection-end-line="133" selection-end-column="0" />
+        <state relative-caret-position="357">
+          <caret line="357" column="0" lean-forward="false" selection-start-line="357" selection-start-column="0" selection-end-line="357" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/simpledb/Tuple.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="216">
+          <caret line="29" column="0" lean-forward="false" selection-start-line="29" selection-start-column="0" selection-end-line="29" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/simpledb/TupleDesc.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="-884">
+          <caret line="9" column="13" lean-forward="false" selection-start-line="9" selection-start-column="13" selection-end-line="9" selection-end-column="13" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/simpledb/DbFile.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="114">
+          <caret line="15" column="0" lean-forward="false" selection-start-line="15" selection-start-column="0" selection-end-line="15" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/test/simpledb/TestUtil.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="43">
+          <caret line="195" column="18" lean-forward="false" selection-start-line="195" selection-start-column="18" selection-end-line="195" selection-end-column="18" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/simpledb/BufferPool.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="284">
+          <caret line="217" column="16" lean-forward="false" selection-start-line="217" selection-start-column="16" selection-end-line="217" selection-end-column="16" />
           <folding />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/src/simpledb/BTreeFile.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="171">
-          <caret line="685" column="12" lean-forward="false" selection-start-line="685" selection-start-column="12" selection-end-line="685" selection-end-column="12" />
+        <state relative-caret-position="-2108">
+          <caret line="5" column="28" lean-forward="false" selection-start-line="5" selection-start-column="28" selection-end-line="5" selection-end-column="28" />
           <folding>
-            <element signature="imports" expanded="true" />
+            <element signature="e#21246#21260#0" expanded="true" />
             <element signature="e#22264#22270#0" expanded="true" />
+            <element signature="e#45302#45316#0" expanded="true" />
+            <element signature="e#45903#45909#0" expanded="true" />
           </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/simpledb/BTreeInternalPage.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="884">
+          <caret line="429" column="11" lean-forward="false" selection-start-line="429" selection-start-column="11" selection-end-line="429" selection-end-column="11" />
+          <folding />
         </state>
       </provider>
     </entry>

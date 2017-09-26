@@ -12,6 +12,7 @@ import java.io.*;
  * by operators.
  */
 public interface DbFile {
+
     /**
      * Read the specified page from disk.
      *
