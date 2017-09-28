@@ -368,8 +368,9 @@ public class BTreeFile implements DbFile {
 		entryToPush.setRightChild(rightpage.getId());
 		BTreeInternalPage parent = getParentWithEmptySlots(tid, dirtypages, leftpage.getParentId(), field);
         parent.insertEntry(entryToPush);
-        updateParentPointers(tid, dirtypages, leftpage);
-        updateParentPointers(tid, dirtypages, rightpage);
+		leftpage.setParentId(parent.getId());
+		rightpage.setParentId(parent.getId());
+		updateParentPointers(tid, dirtypages, rightpage);
 
         // put into dirty page list
         dirtypages.put(parent.getId(), parent);
