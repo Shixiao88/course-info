@@ -237,6 +237,14 @@ public class BufferPool {
      */
     private synchronized  void evictPage() throws DbException {
         Page removePage = pageList.remove(0);
+        // if the page is the root pointer page in B+Tree, then add to the end of list and delete
+        // the next page, as root pointer should not be evicted.
+        if (removePage instanceof BTreeRootPtrPage ||
+                (removePage instanceof BTreeInternalPage &&
+                        ((BTreeInternalPage)removePage).getId().pgcateg() == BTreePageId.ROOT_PTR)) {
+            pageList.add(pageList.size()-1, removePage);
+            removePage = pageList.remove(0);
+        }
         if (removePage.isDirty() != null) {
             try {
                 flushPage(removePage.getId());

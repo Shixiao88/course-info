@@ -297,6 +297,7 @@ public class BTreeFile implements DbFile {
         leftLeaf.setParentId(parentpage.getId());
         rightLeaf.setParentId(parentpage.getId());
         // add the right page and left page into dirtypages
+        dirtypages.put(parentpage.getId(), parentpage);
         dirtypages.put(leftLeaf.getId(),leftLeaf);
         dirtypages.put(rightLeaf.getId(), rightLeaf);
 
@@ -356,6 +357,7 @@ public class BTreeFile implements DbFile {
            // leftpage.updateEntry(nextentry);
             rightpage.insertEntry(nextentry);
             //rightpage.updateEntry(nextentry);
+            updateParentPointer(tid, dirtypages, rightpage.getId(), nextentry.getRightChild());
         }
 
         // the middle entry is always the right most in left page
@@ -370,6 +372,7 @@ public class BTreeFile implements DbFile {
         updateParentPointers(tid, dirtypages, rightpage);
 
         // put into dirty page list
+        dirtypages.put(parent.getId(), parent);
         dirtypages.put(leftpage.getId(), leftpage);
         dirtypages.put(rightpage.getId(), rightpage);
 
