@@ -9,7 +9,7 @@ import java.util.NoSuchElementException;
 /**
  * Created by Xiao Shi on 2017/8/24.
  */
-public class DbFileIter implements DbFileIterator {
+public class HPFileIter implements DbFileIterator {
 
     private int pageIndexInThisFile;
     private TransactionId tid;
@@ -20,7 +20,7 @@ public class DbFileIter implements DbFileIterator {
     private HeapFile f;
     private HeapPageId initialId;
 
-    public DbFileIter(TransactionId tid, int tableId) {
+    public HPFileIter(TransactionId tid, int tableId) {
         try {
             this.tid = tid;
             this.fileId = tableId;

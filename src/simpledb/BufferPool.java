@@ -4,7 +4,8 @@ import java.io.*;
 
 import java.lang.reflect.Array;
 import java.util.ArrayList;
-import java.util.concurrent.ConcurrentHashMap;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * BufferPool manages the reading and writing of pages into memory from
@@ -30,6 +31,70 @@ public class BufferPool {
 
     private ArrayList<Page> pageList ;
     private int max_page_num;
+    private Map<PageId, ArrayList<Lock>> pageShareLocks;
+    private Map<PageId, Lock> pageExclusiveLocks;
+
+    private class Lock {
+        private TransactionId tid;
+        private int lockType;
+        private PageId pid;
+
+        private static final int SHARE_LOCK = 0;
+        private static final int EXCLUSIVE_LOCK = 1;
+
+        Lock(TransactionId tid, PageId pid, Permissions perm) {
+            this.tid = tid;
+            this.pid = pid;
+            if (perm == Permissions.READ_WRITE) {
+               lockType = EXCLUSIVE_LOCK;
+           } else {
+                lockType = SHARE_LOCK;
+            }
+        }
+
+        /* if in WRITE MODE, there exist the object, lock fail and return -1;
+        *  otherwise, add in the exclusive and share lock list
+        *  if in READ MODE, add in the share lock list
+        *  */
+        int start() {
+            if (lockType == EXCLUSIVE_LOCK) {
+                // if fail do we need to put it into waiting queue?
+                if (pageExclusiveLocks.containsKey(pid)) {
+                    return -1;
+                } else {
+                    pageExclusiveLocks.put(pid, this);
+                }
+            }
+            ArrayList<Lock> lockarry = new ArrayList<>();
+            if (pageShareLocks.containsKey(pid)) {
+                lockarry = pageShareLocks.get(pid);
+            }
+            lockarry.add(this);
+            pageShareLocks.put(pid, lockarry);
+            return 1;
+        }
+
+        int close() {
+            if (lockType == EXCLUSIVE_LOCK) {
+                if (!pageExclusiveLocks.containsKey(pid) || !(pageExclusiveLocks.get(pid).equals(this))) {
+                    return -1;
+                } else {
+                    pageExclusiveLocks.remove(pid);
+                }
+            }
+            if (!pageShareLocks.containsKey(pid)) {
+                return -1;
+            } else {
+                ArrayList<Lock> lockarray = pageShareLocks.get(pid);
+                lockarray.remove(this);
+                pageShareLocks.put(pid, lockarray);
+            }
+            return 1;
+        }
+
+
+    }
+
     /**
      * Creates a BufferPool that caches up to numPages pages.
      *
@@ -38,6 +103,8 @@ public class BufferPool {
     public BufferPool(int numPages) {
         pageList = new ArrayList<>();
         max_page_num = numPages;
+        pageShareLocks = new HashMap<>();
+        pageExclusiveLocks = new HashMap<>();
     }
     
     public static int getPageSize() {
@@ -71,6 +138,9 @@ public class BufferPool {
      */
     public Page getPage(TransactionId tid, PageId pid, Permissions perm)
         throws TransactionAbortedException, DbException {
+        Lock lock = new Lock(tid, pid, perm);
+        int lockresult = lock.start();
+        if (lockresult < 0) { throw new DbException("error in transaction"); }
         for (Page pg : pageList) {
             if (pg.getId().equals(pid)) {
                 return pg;
@@ -89,6 +159,19 @@ public class BufferPool {
         }
     }
 
+     Lock getLock(TransactionId tid, PageId pid) {
+        if (pageShareLocks.containsKey(pid)) {
+            ArrayList<Lock> lks = pageShareLocks.get(pid);
+            for (Lock lk : lks) {
+                if (lk.tid.equals(tid)) {
+                    return lk;
+                }
+            }
+            return null;
+        }
+        return null;
+    }
+
     /**
      * Releases the lock on a page.
      * Calling this is very risky, and may result in wrong behavior. Think hard
@@ -101,6 +184,10 @@ public class BufferPool {
     public  void releasePage(TransactionId tid, PageId pid) {
         // some code goes here
         // not necessary for lab1|lab2
+        Lock lock = getLock(tid, pid);
+        if (lock != null) {
+           lock.close();
+        }
     }
 
     /**
@@ -117,7 +204,8 @@ public class BufferPool {
     public boolean holdsLock(TransactionId tid, PageId p) {
         // some code goes here
         // not necessary for lab1|lab2
-        return false;
+        Lock lock = getLock(tid, p);
+        return lock != null;
     }
 
     /**
