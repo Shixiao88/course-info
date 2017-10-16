@@ -2,10 +2,7 @@ package simpledb;
 
 import java.io.*;
 
-import java.lang.reflect.Array;
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
 
 /**
  * BufferPool manages the reading and writing of pages into memory from
@@ -29,82 +26,23 @@ public class BufferPool {
     constructor instead. */
     public static final int DEFAULT_PAGES = 50;
 
+    public static final int WAIT_TIME = 10;
+
     private ArrayList<Page> pageList ;
     private int max_page_num;
-    private Map<PageId, ArrayList<Lock>> pageShareLocks;
-    private Map<PageId, Lock> pageExclusiveLocks;
-
-    private class Lock {
-        private TransactionId tid;
-        private int lockType;
-        private PageId pid;
-
-        private static final int SHARE_LOCK = 0;
-        private static final int EXCLUSIVE_LOCK = 1;
-
-        Lock(TransactionId tid, PageId pid, Permissions perm) {
-            this.tid = tid;
-            this.pid = pid;
-            if (perm == Permissions.READ_WRITE) {
-               lockType = EXCLUSIVE_LOCK;
-           } else {
-                lockType = SHARE_LOCK;
-            }
-        }
-
-        /* if in WRITE MODE, there exist the object, lock fail and return -1;
-        *  otherwise, add in the exclusive and share lock list
-        *  if in READ MODE, add in the share lock list
-        *  */
-        int start() {
-            if (lockType == EXCLUSIVE_LOCK) {
-                // if fail do we need to put it into waiting queue?
-                if (pageExclusiveLocks.containsKey(pid)) {
-                    return -1;
-                } else {
-                    pageExclusiveLocks.put(pid, this);
-                }
-            }
-            ArrayList<Lock> lockarry = new ArrayList<>();
-            if (pageShareLocks.containsKey(pid)) {
-                lockarry = pageShareLocks.get(pid);
-            }
-            lockarry.add(this);
-            pageShareLocks.put(pid, lockarry);
-            return 1;
-        }
-
-        int close() {
-            if (lockType == EXCLUSIVE_LOCK) {
-                if (!pageExclusiveLocks.containsKey(pid) || !(pageExclusiveLocks.get(pid).equals(this))) {
-                    return -1;
-                } else {
-                    pageExclusiveLocks.remove(pid);
-                }
-            }
-            if (!pageShareLocks.containsKey(pid)) {
-                return -1;
-            } else {
-                ArrayList<Lock> lockarray = pageShareLocks.get(pid);
-                lockarray.remove(this);
-                pageShareLocks.put(pid, lockarray);
-            }
-            return 1;
-        }
-
-
-    }
+    private ConcurrencyBoard markBoard;
 
     /**
      * Creates a BufferPool that caches up to numPages pages.
      *
      * @param numPages maximum number of pages in this buffer pool.
+     *
+     * when launch a new bufferpool, create a new board.
      */
     public BufferPool(int numPages) {
         pageList = new ArrayList<>();
         max_page_num = numPages;
-        pageShareLocks = new HashMap<>();
-        pageExclusiveLocks = new HashMap<>();
+        markBoard = new ConcurrencyBoard();
     }
     
     public static int getPageSize() {
@@ -138,38 +76,64 @@ public class BufferPool {
      */
     public Page getPage(TransactionId tid, PageId pid, Permissions perm)
         throws TransactionAbortedException, DbException {
-        Lock lock = new Lock(tid, pid, perm);
-        int lockresult = lock.start();
-        if (lockresult < 0) { throw new DbException("error in transaction"); }
-        for (Page pg : pageList) {
-            if (pg.getId().equals(pid)) {
-                return pg;
-            }
-        }
-        DbFile dbfile = Database.getCatalog().getDbFile(pid.getTableId());
-        Page noExistPage = dbfile.readPage(pid);
-        if (pageList.size() < max_page_num) {
-            pageList.add(pageList.size(), noExistPage);
-            return noExistPage;
-        } else {
+        PageLockId lockid = new PageLockId(tid, pid, perm);
+        while (true) {
+            int res = markBoard.addPageLockPair(pid, lockid);
+            if (res < 0) {
+                //on hold, loop to sleep
+                try {
+                    markBoard.putLockOnHold(lockid);
+                    PageLock lock = new PageLock(lockid);
+                    Thread.sleep(WAIT_TIME);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                    return null;
+                }
+            } else {
+                markBoard.addTranLockPair(tid, lockid);
+                PageLock lock = new PageLock(lockid);
+                for (Page pg : pageList) {
+                    if (pg.getId().equals(pid)) {
+                        return pg;
+                    }
+                }
+                DbFile dbfile = Database.getCatalog().getDbFile(pid.getTableId());
+                Page noExistPage = dbfile.readPage(pid);
+                if (pageList.size() < max_page_num) {
+                    pageList.add(pageList.size(), noExistPage);
+                    return noExistPage;
+                } else {
             /*Eviction Policy afterwards */
-            evictPage();
-            pageList.add(pageList.size(), noExistPage);
-            return noExistPage;
+                    evictPage();
+                    pageList.add(pageList.size(), noExistPage);
+                    return noExistPage;
+                }
+            }
         }
     }
 
-     Lock getLock(TransactionId tid, PageId pid) {
-        if (pageShareLocks.containsKey(pid)) {
-            ArrayList<Lock> lks = pageShareLocks.get(pid);
-            for (Lock lk : lks) {
-                if (lk.tid.equals(tid)) {
-                    return lk;
+    /**
+     * the common function to lock the page with such transaction id
+     * need to think about the lock stage to avoid race condition
+     * */
+    LockId lockPage(TransactionId tid, PageId pid, Permissions perm) {
+        PageLockId lid = new PageLockId(tid, pid, perm);
+        PageLock lock = new PageLock(lid);
+        while (true) {
+            try {
+                int res = markBoard.addPageLockPair(pid, lid);
+                if (res < 0) {
+                    Thread.sleep(WAIT_TIME);
+                    markBoard.putLockOnHold(lid);
+                } else {
+                    markBoard.releaseLockOnHold(lid);
+                    lock.open();
+                    markBoard.addTranLockPair(tid, lid);
+
                 }
+            } catch (java.lang.InterruptedException e) {
             }
-            return null;
         }
-        return null;
     }
 
     /**
@@ -184,10 +148,7 @@ public class BufferPool {
     public  void releasePage(TransactionId tid, PageId pid) {
         // some code goes here
         // not necessary for lab1|lab2
-        Lock lock = getLock(tid, pid);
-        if (lock != null) {
-           lock.close();
-        }
+        ArrayList<LockId> lockid = markBoard.getLockIdByPid(pid);
     }
 
     /**
