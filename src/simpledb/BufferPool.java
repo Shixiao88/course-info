@@ -74,7 +74,7 @@ public class BufferPool {
      * @param pid the ID of the requested page
      * @param perm the requested permissions on the page
      */
-    public Page getPage(TransactionId tid, PageId pid, Permissions perm)
+    public synchronized Page getPage(TransactionId tid, PageId pid, Permissions perm)
         throws TransactionAbortedException, DbException {
         PageLockId lockid = new PageLockId(tid, pid, perm);
         while (true) {
@@ -116,7 +116,7 @@ public class BufferPool {
      * the common function to lock the page with such transaction id
      * need to think about the lock stage to avoid race condition
      * */
-    LockId lockPage(TransactionId tid, PageId pid, Permissions perm) {
+    synchronized LockId lockPage(TransactionId tid, PageId pid, Permissions perm) {
         PageLockId lid = new PageLockId(tid, pid, perm);
         PageLock lock = new PageLock(lid);
         while (true) {
