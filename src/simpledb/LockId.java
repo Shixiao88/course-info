@@ -21,6 +21,8 @@ public interface LockId {
 
     }
 
+    public boolean equals(Object that);
+
     public TransactionId getTransactionId();
 
     public PageId getPageId();

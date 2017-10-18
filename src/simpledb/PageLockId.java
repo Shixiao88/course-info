@@ -42,6 +42,18 @@ public class PageLockId implements LockId {
         }
 
     }
+
+    @Override
+    public boolean equals(Object that) {
+        if (that == null) return false;
+        else if (that == this) return true;
+        else if (!(that instanceof PageLockId)) return false;
+        else {
+            PageLockId thatid = (PageLockId)that;
+            return (this.tid.equals(thatid.getTransactionId()) && this.pid.equals(((PageLockId) that).getPageId()));
+        }
+    }
+
     public TransactionId getTransactionId() {
         return tid;
     }

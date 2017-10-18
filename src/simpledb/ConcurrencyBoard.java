@@ -1,10 +1,10 @@
 package simpledb;
 
-import com.sun.security.sasl.util.AbstractSaslImpl;
-
-import java.lang.reflect.Array;
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.*;
 
 /**
  * Created by Xiao Shi on 2017/10/16.
@@ -12,21 +12,24 @@ import java.util.HashMap;
 
 /**
  * the ConcurencyBoard keeps track of two pairs
- * 1. trasaction -- group of locks
- * 2. page -- group of locks
- * 3. on-hold page
- * 4. on-hold transaction
+ * 1. trasaction -- group of locks it holds, must be thread safe
+ * 2. page -- group of locks it has, must be thread safe;
+ *    the group of lockes also must be thread safe.
+ * 3. page -- exclusive lock flag, must be thread safe
+ * 4. on-hold transaction, must be thread safe
  */
 public class ConcurrencyBoard {
-    private HashMap<TransactionId, ArrayList<LockId>> tran_lock_map;
-    private HashMap<PageId, ArrayList<LockId>> page_lock_map;
-    private ArrayList<LockId> onHoldLocks;
+    private final Map<TransactionId, ArrayList<LockId>> tran_lock_map;
+    private final Map<PageId, ArrayList<LockId>> page_lock_map;
+    private final Map<PageId, Boolean> page_ifExcludeLock_map;
+    private final List<TransactionId> on_hold_tid;
 
 
     public ConcurrencyBoard() {
-        tran_lock_map = new HashMap<>();
-        page_lock_map = new HashMap<>();
-        onHoldLocks = new ArrayList<>();
+        tran_lock_map = Collections.synchronizedMap(new HashMap<>());
+        page_lock_map = Collections.synchronizedMap(new HashMap<>());
+        page_ifExcludeLock_map = Collections.synchronizedMap(new HashMap<>());
+        on_hold_tid = Collections.synchronizedList(new ArrayList<>());
     }
 
     /**
@@ -59,21 +62,34 @@ public class ConcurrencyBoard {
 
     /**
      *  one page can only have one exclusive lock,
-     *  if add lock to page fail, return -1, else return 0.
+     *  if the page has exclusive page, return 1, put the transaction in waiting queue
+     *  else return 0
      * */
-    public int addPageLockPair(PageId pid, LockId lid) {
+    public int addPageLock (TransactionId tid, PageId pid, LockId lid) throws DbException {
+        if (!(lid.getPageId().equals(pid)) || !(lid.getTransactionId().equals(tid))) {
+            throw new DbException("page is not corresponding to lock");
+        }
         if (page_lock_map.containsKey(pid)) {
             ArrayList<LockId> lids = page_lock_map.get(pid);
-            for (LockId lockid : lids) {
-                if (lockid.getType() == LockId.LockType.EXCLUSIVE_LOCK) {
-                    return -1;
+            boolean isPageExcLocked = page_ifExcludeLock_map.get(pid);
+            if (!isPageExcLocked) {
+                lids.add(lid);
+                if (lid.getType().equals(LockId.LockType.EXCLUSIVE_LOCK)) {
+                    page_ifExcludeLock_map.put(pid, true);
                 }
+                return 0;
+            } else {
+                on_hold_tid.add(tid);
+                return 1;
             }
-            lids.add(lid);
-            return 0;
         } else{
-            ArrayList<LockId> lids = new ArrayList<>();
+            List <LockId> lids = Collections.synchronizedList(new ArrayList<>());
             lids.add(lid);
+            if (lid.getType().equals(LockId.LockType.EXCLUSIVE_LOCK)) {
+                page_ifExcludeLock_map.put(pid, true);
+            } else {
+                page_ifExcludeLock_map.put(pid, false);
+            }
             return 0;
         }
     }

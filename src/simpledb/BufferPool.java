@@ -74,12 +74,16 @@ public class BufferPool {
      * @param pid the ID of the requested page
      * @param perm the requested permissions on the page
      */
-    public synchronized Page getPage(TransactionId tid, PageId pid, Permissions perm)
+    public Page getPage(TransactionId tid, PageId pid, Permissions perm)
         throws TransactionAbortedException, DbException {
-        PageLockId lockid = new PageLockId(tid, pid, perm);
+        final PageLockId lockid = new PageLockId(tid, pid, perm);
+        final PageLock lock = new PageLock(lockid);
         while (true) {
-            int res = markBoard.addPageLockPair(pid, lockid);
+            int res = markBoard.addPageLock(tid, pid, lockid);
             if (res < 0) {
+                /*
+                * the producer, consumer model, where to establish?
+                * */
                 //on hold, loop to sleep
                 try {
                     markBoard.putLockOnHold(lockid);
