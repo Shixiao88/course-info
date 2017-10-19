@@ -1,10 +1,8 @@
 package simpledb;
 
-import java.lang.reflect.Array;
 import java.text.ParseException;
 import java.util.*;
 import java.io.*;
-import simpledb.Tuple;
 
 /**
  * Each instance of HeapPage stores data for one page of HeapFiles and 

@@ -330,16 +330,16 @@ public class BTreeInternalPage extends BTreePage {
 			throw new DbException("tried to delete entry with null rid");
 		if((rid.getPageId().pageNumber() != pid.pageNumber()) || (rid.getPageId().getTableId() != pid.getTableId()))
 			throw new DbException("tried to delete entry on invalid page or table");
-		if (!isSlotUsed(rid.tupleno()))
+		if (!isSlotUsed(rid.getTupleNumber()))
 			throw new DbException("tried to delete null entry.");
 		if(deleteRightChild) {
-			markSlotUsed(rid.tupleno(), false); 
+			markSlotUsed(rid.getTupleNumber(), false);
 		}
 		else {
-			for(int i = rid.tupleno() - 1; i >= 0; i--) {
+			for(int i = rid.getTupleNumber() - 1; i >= 0; i--) {
 				if(isSlotUsed(i)) {
-					children[i] = children[rid.tupleno()];
-					markSlotUsed(rid.tupleno(), false); 
+					children[i] = children[rid.getTupleNumber()];
+					markSlotUsed(rid.getTupleNumber(), false);
 					break;
 				}	
 			}
@@ -387,10 +387,10 @@ public class BTreeInternalPage extends BTreePage {
 			throw new DbException("tried to update entry with null rid");
 		if((rid.getPageId().pageNumber() != pid.pageNumber()) || (rid.getPageId().getTableId() != pid.getTableId()))
 			throw new DbException("tried to update entry on invalid page or table");
-		if (!isSlotUsed(rid.tupleno()))
+		if (!isSlotUsed(rid.getTupleNumber()))
 			throw new DbException("tried to update null entry.");
 		
-		for(int i = rid.tupleno() + 1; i < numSlots; i++) {
+		for(int i = rid.getTupleNumber() + 1; i < numSlots; i++) {
 			if(isSlotUsed(i)) {
 				if(keys[i].compare(Op.LESS_THAN, e.getKey())) {
 					throw new DbException("attempt to update entry with invalid key " + e.getKey() +
@@ -399,7 +399,7 @@ public class BTreeInternalPage extends BTreePage {
 				break;
 			}	
 		}
-		for(int i = rid.tupleno() - 1; i >= 0; i--) {
+		for(int i = rid.getTupleNumber() - 1; i >= 0; i--) {
 			if(isSlotUsed(i)) {
 				if(i > 0 && keys[i].compare(Op.GREATER_THAN, e.getKey())) {
 					throw new DbException("attempt to update entry with invalid key " + e.getKey() +
@@ -409,8 +409,8 @@ public class BTreeInternalPage extends BTreePage {
 				break;
 			}	
 		}
-		children[rid.tupleno()] = e.getRightChild().pageNumber(); 
-		keys[rid.tupleno()] = e.getKey();
+		children[rid.getTupleNumber()] = e.getRightChild().pageNumber();
+		keys[rid.getTupleNumber()] = e.getKey();
 	}
 
 	/**

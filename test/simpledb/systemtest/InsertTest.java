@@ -25,18 +25,18 @@ public class InsertTest extends SimpleDbTestBase {
         SeqScan ss = new SeqScan(tid, source.getId(), "");
         Insert insOp = new Insert(tid, ss, destination.getId());
 
-        Query q = new Query(insOp, tid);
-        q.start();
+//        Query q = new Query(insOp, tid);
+        insOp.open();
         boolean hasResult = false;
-        while (q.hasNext()) {
-            Tuple tup = q.next();
+        while (insOp.hasNext()) {
+            Tuple tup = insOp.next();
             assertFalse(hasResult);
             hasResult = true;
             assertEquals(SystemTestUtil.SINGLE_INT_DESCRIPTOR, tup.getTupleDesc());
             assertEquals(sourceRows, ((IntField) tup.getField(0)).getValue());
         }
         assertTrue(hasResult);
-        q.close();
+        insOp.close();
 
         // As part of the same transaction, scan the table
         sourceTuples.addAll(destinationTuples);

@@ -1,5 +1,7 @@
 package simpledb;
 
+import com.sun.org.apache.xml.internal.security.encryption.AgreementMethod;
+
 import java.util.*;
 
 /**
@@ -11,6 +13,9 @@ public class Aggregate extends Operator {
     private Aggregator agg;
     private DbIterator aggiter;
     private DbIterator feed;
+    private final int afield;
+    private final int groupfield;
+    private final Aggregator.Op op;
 
     /**
      * Constructor.  
@@ -26,7 +31,10 @@ public class Aggregate extends Operator {
      */
     public Aggregate(DbIterator child, int afield, int gfield, Aggregator.Op aop) {
         this.feed = child;
-        Type type = child.getTupleDesc().getFieldType(afield);
+        this.afield = afield;
+        this.groupfield = gfield;
+        this.op = aop;
+        Type type = child.getTupleDesc().getFieldType(gfield);
         // integer aggregator
         if (type == Type.INT_TYPE) {
             agg = new IntegerAggregator(gfield, Type.INT_TYPE, afield, aop);
@@ -42,6 +50,55 @@ public class Aggregate extends Operator {
         } catch (DbException | TransactionAbortedException e) {
             e.printStackTrace();
         }
+    }
+
+    /**
+     * @return If this aggregate is accompanied by a groupby, return the groupby
+     *         field index in the <b>INPUT</b> tuples. If not, return
+     *         {@link simpledb.Aggregator#NO_GROUPING}
+     * */
+    public int groupField() {
+        // some code goes here
+        if (groupfield >= 0) return groupfield;
+        return Aggregator.NO_GROUPING;
+    }
+
+    /**
+     * @return If this aggregate is accompanied by a group by, return the name
+     *         of the groupby field in the <b>OUTPUT</b> tuples. If not, return
+     *         null;
+     * */
+    public String groupFieldName() {
+        // some code goes here
+        if (groupfield >= 0) {
+            return feed.getTupleDesc().getFieldName(groupfield);
+        }
+        return null;
+    }
+
+    /**
+     * @return the aggregate field
+     * */
+    public int aggregateField() {
+        // some code goes here
+        return afield;
+    }
+
+    /**
+     * @return return the name of the aggregate field in the <b>OUTPUT</b>
+     *         tuples
+     * */
+    public String aggregateFieldName() {
+        // some code goes here
+        return feed.getTupleDesc().getFieldName(afield);
+    }
+
+    /**
+     * @return return the aggregate operator
+     * */
+    public Aggregator.Op aggregateOp() {
+        // some code goes here
+        return op;
     }
 
     public static String nameOfAggregatorOp(Aggregator.Op aop) {
@@ -63,6 +120,7 @@ public class Aggregate extends Operator {
     public void open()
         throws NoSuchElementException, DbException, TransactionAbortedException {
         aggiter.open();
+        super.open();
     }
 
     /**
@@ -106,5 +164,18 @@ public class Aggregate extends Operator {
 
     public void close() {
         aggiter.close();
+        super.close();
+    }
+
+    @Override
+    public DbIterator[] getChildren() {
+        // some code goes here
+        return new DbIterator[]{feed};
+    }
+
+    @Override
+    public void setChildren(DbIterator[] children) {
+        // some code goes here
+        feed = children[0];
     }
 }

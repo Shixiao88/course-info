@@ -271,9 +271,9 @@ public class BTreeLeafPage extends BTreePage {
 			throw new DbException("tried to delete tuple with null rid");
 		if((rid.getPageId().pageNumber() != pid.pageNumber()) || (rid.getPageId().getTableId() != pid.getTableId()))
 			throw new DbException("tried to delete tuple on invalid page or table");
-		if (!isSlotUsed(rid.tupleno()))
+		if (!isSlotUsed(rid.getTupleNumber()))
 			throw new DbException("tried to delete null tuple.");
-		markSlotUsed(rid.tupleno(), false);
+		markSlotUsed(rid.getTupleNumber(), false);
 		t.setRecordId(null);
 	}
 

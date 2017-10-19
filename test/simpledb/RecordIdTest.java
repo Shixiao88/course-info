@@ -37,10 +37,10 @@ public class RecordIdTest extends SimpleDbTestBase {
     }
 
     /**
-     * Unit test for RecordId.tupleno()
+     * Unit test for RecordId.getTupleNumber()
      */
-    @Test public void tupleno() {
-        assertEquals(3, hrid.tupleno());
+    @Test public void getTupleNumber() {
+        assertEquals(3, hrid.getTupleNumber());
     }
     
     /**

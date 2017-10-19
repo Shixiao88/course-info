@@ -23,14 +23,16 @@ public class RecordId implements Serializable {
      *            the tuple number within the page.
      */
     public RecordId(PageId pid, int tupleno) {
-       this.pid = pid;
-       this.tupleno = tupleno;
+        // some code goes here
+        this.pid = pid;
+        this.tupleno = tupleno;
     }
 
     /**
      * @return the tuple number this RecordId references.
      */
-    public int tupleno() {
+    public int getTupleNumber() {
+        // some code goes here
         return tupleno;
     }
 
@@ -38,6 +40,7 @@ public class RecordId implements Serializable {
      * @return the page id this RecordId references.
      */
     public PageId getPageId() {
+        // some code goes here
         return pid;
     }
 
@@ -49,10 +52,12 @@ public class RecordId implements Serializable {
      */
     @Override
     public boolean equals(Object o) {
+        // some code goes here
         if (o == null)  return false;
         else if (!(o instanceof RecordId)) return false;
         else {
-            return (((RecordId)o).getPageId().equals(pid) && ((RecordId)o).tupleno() == tupleno);
+            RecordId o_rid = (RecordId)o;
+            return (((RecordId)o).getPageId().equals(pid) && (o_rid.getTupleNumber() == tupleno));
         }
     }
 
@@ -64,7 +69,9 @@ public class RecordId implements Serializable {
      */
     @Override
     public int hashCode() {
+        // some code goes here
         return (pid.hashCode() * 37 + tupleno);
+
     }
 
 }
