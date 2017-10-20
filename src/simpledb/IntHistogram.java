@@ -1,8 +1,22 @@
 package simpledb;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
+
 /** A class to represent a fixed-width histogram over a single integer-based field.
  */
 public class IntHistogram {
+
+    private int numTuples;
+    private int numBuckets;
+    private int min;
+    private int max;
+    private double interval;
+    /* mark the buckets from 0 to numBuckets - 1, the value falls into corresponding interval will fall into
+    *  indexed buckets
+    *  */
+    private Map <Integer, ArrayList<Integer>> histogram;
 
     /**
      * Create a new IntHistogram.
@@ -22,6 +36,22 @@ public class IntHistogram {
      */
     public IntHistogram(int buckets, int min, int max) {
     	// some code goes here
+        this.numTuples = 0;
+        this.numBuckets = buckets;
+        this.min = min;
+        this.max = max;
+        /*
+         * interval maybe float, considering equaly division must be like this.
+        * */
+        this.interval = (max + 1 - min) / (double)buckets;
+        histogram = new HashMap<>();
+        for (int i = 0; i < numBuckets; i += 1) {
+            histogram.put(i, new ArrayList<>());
+        }
+    }
+
+    private int getBuckteIndexByValue (int v) {
+        return (int)((v - min) / interval);
     }
 
     /**
@@ -29,7 +59,86 @@ public class IntHistogram {
      * @param v Value to add to the histogram
      */
     public void addValue(int v) {
+        numTuples += 1;
     	// some code goes here
+        /* check v falls into which bucket, and fall into indexed buckets (index 0 ~ numBuckets - 1)
+         * if v is less than min or larger than max, create a new range for it;
+         * */
+        if (v >= min && v <= max) {
+            int vIndex = getBuckteIndexByValue(v);
+            ArrayList<Integer> itemsInBucktes = histogram.get(vIndex);
+            itemsInBucktes.add(v);
+            histogram.put(vIndex, itemsInBucktes);
+
+            /* if the added value is smaller than current minimum value.
+                update the min
+                calculate the possible gap between old min and current min (can be several intervals)
+                update number of buckets
+                update histogram's indexes, in order to avoid interleaves with current histogram,
+                create a copy histogram and change the pointer at last;
+            * */
+
+        } else if (v < min) {
+            HashMap<Integer, ArrayList<Integer>> copyHistogram = new HashMap<>();
+            int oldmin = min;
+            min = v;
+            int numInterval = (int)(Math.ceil(oldmin - v) / interval);
+            numBuckets += numInterval;
+            ArrayList<Integer> newMinBucket = new ArrayList<>();
+            newMinBucket.add(v);
+            copyHistogram.put(0, newMinBucket);
+            for (int i = 1; i < numInterval; i += 1) {
+                copyHistogram.put(i, new ArrayList<>());
+            }for (int i = numInterval; i < numBuckets; i += 1) {
+                copyHistogram.put(i, histogram.get(i - numInterval));
+            }
+            histogram = copyHistogram;
+
+            /* if the added value is larger than current max value, same as above situation */
+        } else {
+            HashMap<Integer, ArrayList<Integer>> copyHisgram = new HashMap<>();
+            int oldmax = max;
+            max = v;
+            int numInterval = (int)(Math.ceil(v - oldmax) / interval);
+            numBuckets += numInterval;
+            ArrayList<Integer> newMaxBucket = new ArrayList<>();
+            newMaxBucket.add(v);
+            copyHisgram.put(numBuckets - 1, newMaxBucket);
+            for (int i = 0; i < oldmax; i += 1) {
+                copyHisgram.put(i, histogram.get(i));
+            } for (int i = oldmax; i < numBuckets - 1; i += 1) {
+                copyHisgram.put(i, new ArrayList<>());
+            }
+            histogram = copyHisgram;
+        }
+    }
+
+    private double estimateEqualSelectivity(Predicate.Op op, int v) {
+        if (v >= min && v <= max) {
+            int vIndex = getBuckteIndexByValue(v);
+            int numItemInBucket = (histogram.get(vIndex)).size();
+            return (numItemInBucket / interval) / numTuples;
+        } else {
+            return 0.0;
+        }
+    }
+
+    private double estimateLargerSelectivity(Predicate.Op op, int v) {
+        if (v >= min && v < max) {
+            int vIndex = getBuckteIndexByValue(v);
+            int numItemInBucket = (histogram.get(vIndex)).size();
+            double maxInBucket = min + (vIndex + 1) * interval;
+            double distributeInCurrentBucket = ((numItemInBucket / interval) * (maxInBucket - v)) / numTuples;
+            double distributeLargerBucket = 0.0;
+            for (int i = vIndex + 1; i < numBuckets; i += 1) {
+                distributeLargerBucket += ((histogram.get(i)).size() / numTuples);
+            }
+            return distributeInCurrentBucket + distributeLargerBucket;
+        } else if (v < min) {
+            return 1.0;
+        } else {
+            return 0.0;
+        }
     }
 
     /**
@@ -43,17 +152,40 @@ public class IntHistogram {
      * @return Predicted selectivity of this particular operator and value
      */
     public double estimateSelectivity(Predicate.Op op, int v) {
-
     	// some code goes here
-        return -1.0;
+        double selectivity = -1.0;
+        switch (op) {
+            case EQUALS:
+                selectivity = estimateEqualSelectivity(op, v);
+                break;
+            case GREATER_THAN:
+                selectivity = estimateLargerSelectivity(op, v);
+                break;
+            case GREATER_THAN_OR_EQ:
+                selectivity = estimateEqualSelectivity(op, v) +
+                        estimateLargerSelectivity(op, v);
+                break;
+            case LESS_THAN:
+                selectivity = 1 - estimateLargerSelectivity(op, v) -
+                        estimateEqualSelectivity(op, v);
+                break;
+            case LESS_THAN_OR_EQ:
+                selectivity = 1 - estimateLargerSelectivity(op, v);
+        }
+        return selectivity;
     }
     
     /**
      * @return A string describing this histogram, for debugging purposes
      */
     public String toString() {
-
         // some code goes here
-        return null;
+        String s = "";
+        for (int i = 0 ; i < numBuckets; i += 1) {
+            String line = "index: " + i + ", range: [" + (min + (interval * i)) +
+                    " , " + (min + (interval * (i + 1))) + "), fallsIns: {" + histogram.get(i).toString() + "}\n";
+            s += line;
+        }
+        return s;
     }
 }

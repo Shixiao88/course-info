@@ -277,7 +277,6 @@ public class HeapPage implements Page {
      */
     public void insertTuple(Tuple t) throws DbException {
         int num_slot = getNumTuples();
-        int f = getNumEmptySlots();
         if (getNumEmptySlots() > 0) {
             for (int i = 0; i < num_slot; i += 1) {
                 if (!(isSlotUsed(i))) {

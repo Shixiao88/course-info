@@ -35,7 +35,11 @@ public class TupleDesc implements Serializable {
         }
 
         public String toString() {
-            return fieldName + "(" + fieldType + ")";
+            if (fieldType == Type.INT_TYPE) {
+                return "INT(" + fieldName + "),";
+            } else {
+                return "STR(" + fieldName + "),";
+            }
         }
     }
 
@@ -85,6 +89,10 @@ public class TupleDesc implements Serializable {
         if (fieldAr != null) {
             for (int i = 0; i < tditmeNum; i += 1) {
                 tds.add(new TDItem(typeAr[i], fieldAr[i]));
+            }
+        } else {
+            for (int i = 0; i < tditmeNum; i += 1) {
+                tds.add(new TDItem(typeAr[i], ""));
             }
         }
         this.tditmes = tds.toArray(new TDItem[1]);
@@ -255,6 +263,7 @@ public class TupleDesc implements Serializable {
     public String toString() {
         String s = "";
         for (int i = 0; i < tditmeNum; i += 1) {
+
             s += tditmes[i].toString();
         }
         return s;

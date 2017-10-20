@@ -151,6 +151,9 @@ public class BufferPool {
         ArrayList<Page> plst = f.insertTuple(tid, t);
         for (Page p : plst) {
             p.markDirty(true, tid);
+            /* FORCE policy, write the dirty page back to the disk and unmark the dirty page */
+            f.writePage(p);
+            p.markDirty(false, tid);
         }
         return;
     }
