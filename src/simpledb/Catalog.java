@@ -5,7 +5,6 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
 import java.lang.Integer;
 
 /**
@@ -53,7 +52,15 @@ public class Catalog {
      */
     public void addTable(DbFile file, String name, String pkeyField) {
         tableContent content = new tableContent(file, name, pkeyField);
+        for (HashMap.Entry<Integer, tableContent> entry : tableBoard.entrySet()) {
+            if (entry.getValue().name.equals(name)) {
+                tableBoard.remove(entry.getKey());
+                tableBoard.put(file.getId(), content);
+                return;
+            }
+        }
         tableBoard.put(file.getId(), content);
+        return;
     }
 
     public void addTable(DbFile file, String name) {
@@ -77,7 +84,8 @@ public class Catalog {
      */
     public int getTableId(String name) throws NoSuchElementException {
         for (HashMap.Entry<Integer, tableContent> entry : tableBoard.entrySet()) {
-            if (entry.getValue().name.equals(name)) {
+            tableContent tc = entry.getValue();
+            if (tc.name.equals(name)) {
                 return entry.getKey();
             }
         }

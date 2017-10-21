@@ -5,7 +5,7 @@ package simpledb;
 */
 public class LogicalSelectListNode {
     /** The field name being selected; the name may be (optionally) be
-     * qualified with a table name or alias
+     * qualified with a table name or alias.
      */
     public String fname;
    

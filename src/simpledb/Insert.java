@@ -1,13 +1,14 @@
 package simpledb;
-import java.awt.image.DataBuffer;
 import java.io.IOException;
-import java.util.*;
 
 /**
  * Inserts tuples read from the child operator into
  * the tableid specified in the constructor
  */
 public class Insert extends Operator {
+
+    private static final long serialVersionUID = 1L;
+
     private TransactionId tid;
     private DbIterator feediter;
     private int tableId;
@@ -45,11 +46,13 @@ public class Insert extends Operator {
     public void open() throws DbException, TransactionAbortedException {
         feediter.open();
         hpiter.open();
+        super.open();
     }
 
     public void close() {
         feediter.close();
         hpiter.close();
+        super.close();
     }
 
     public void rewind() throws DbException, TransactionAbortedException {
@@ -91,5 +94,17 @@ public class Insert extends Operator {
         res.setField(0, new IntField(counter));
         isDone = true;
         return res;
+    }
+
+    @Override
+    public DbIterator[] getChildren() {
+        // some code goes here
+        return new DbIterator[] {feediter};
+    }
+
+    @Override
+    public void setChildren(DbIterator[] children) {
+        // some code goes here
+        feediter = children[0];
     }
 }

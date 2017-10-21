@@ -7,6 +7,9 @@ import java.io.IOException;
  * removes them from the table they belong to.
  */
 public class Delete extends Operator {
+
+    private static final long serialVersionUID = 1L;
+
     private TransactionId tid;
     private DbIterator feed;
     private boolean isDone;
@@ -29,10 +32,12 @@ public class Delete extends Operator {
 
     public void open() throws DbException, TransactionAbortedException {
         this.feed.open();
+        super.open();
     }
 
     public void close() {
         this.feed.close();
+        super.close();
     }
 
     public void rewind() throws DbException, TransactionAbortedException {
@@ -68,5 +73,17 @@ public class Delete extends Operator {
         res.setField(0, new IntField(counter));
         isDone = true;
         return res;
+    }
+
+    @Override
+    public DbIterator[] getChildren() {
+        // some code goes here
+        return new DbIterator[]{feed};
+    }
+
+    @Override
+    public void setChildren(DbIterator[] children) {
+        // some code goes here
+        feed = children[0];
     }
 }

@@ -14,17 +14,12 @@ public class FilterTest extends SimpleDbTestBase {
 
   int testWidth = 3;
   DbIterator scan;
-  DbIterator testMul;
 
   /**
    * Initialize each unit test
    */
   @Before public void setUp() {
     this.scan = new TestUtil.MockScan(-5, 5, testWidth);
-    this.testMul = TestUtil.createTupleList( 1,
-        new int[] {
-                    -3, 4, 1, -2, 3
-                    });
   }
 
   /**
@@ -67,23 +62,6 @@ public class FilterTest extends SimpleDbTestBase {
     TestUtil.MockScan expectedOut = new TestUtil.MockScan(-5, 2, testWidth);
     op.open();
     TestUtil.compareDbIterators(op, expectedOut);
-    op.close();
-  }
-
-  /**
-   * Unit test for Filter.getNext() using a &lt; predicate that filters
-   *   some tuples
-   */
-  @Test public void filterSomeLessThan_sec() throws Exception {
-    Predicate pred;
-    pred = new Predicate(0, Predicate.Op.GREATER_THAN, TestUtil.getField(0));
-    Filter op = new Filter(pred, testMul);
-    DbIterator exp = TestUtil.createTupleList( 1,
-        new int[] {
-                    4, 1, 3
-                    });
-    op.open();
-    TestUtil.matchAllTuples(op, exp);
     op.close();
   }
 

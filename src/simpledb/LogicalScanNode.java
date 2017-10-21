@@ -11,8 +11,8 @@ public class LogicalScanNode {
      *   to retrieve a DbFile */
     public int t;
 
-    public LogicalScanNode(int table, String alias) {
-        this.alias = alias;
+    public LogicalScanNode(int table, String tableAlias) {
+        this.alias = tableAlias;
         this.t = table;
     }
 }

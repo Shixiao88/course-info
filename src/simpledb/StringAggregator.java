@@ -2,7 +2,6 @@ package simpledb;
 
 import java.util.ArrayList;
 import java.util.Iterator;
-import java.util.ListIterator;
 
 /**
  * Knows how to compute some aggregate over a set of StringFields.
@@ -37,12 +36,15 @@ public class StringAggregator implements Aggregator {
      */
     public void mergeTupleIntoGroup(Tuple tup) {
         boolean hasGroup = false;
-        td = tup.getTupleDesc();
+        td = new TupleDesc(new Type[]{tup.getField(gbfindex).getType(), Type.INT_TYPE});
         Tuple newtuple = new Tuple(td);
         if (tuplelist.size() == 0) {
             if (op == Op.COUNT) {
                 newtuple.setField(gbfindex, tup.getField(gbfindex));
                 newtuple.setField(afield, new IntField(1));
+            } else if (op == Op.SUM) {
+                newtuple.setField(gbfindex, tup.getField(gbfindex));
+                newtuple.setField(afield, tup.getField(afield));
             } else {
                 newtuple.setField(gbfindex, tup.getField(gbfindex));
                 newtuple.setField(afield, tup.getField(afield));
@@ -54,10 +56,13 @@ public class StringAggregator implements Aggregator {
                     hasGroup = true;
                     IntField fd2 = (IntField) t.getField(afield);
                     switch(op) {
-                    case COUNT:
-                         int counter = fd2.getValue() + 1;
-                         t.setField(afield, new IntField(counter));
-                         break;
+                        case COUNT:
+                             int counter = fd2.getValue() + 1;
+                             t.setField(afield, new IntField(counter));
+                             break;
+                        case SUM:
+                            int updateCounter = ((IntField)tup.getField(afield)).getValue() + fd2.getValue();
+                            t.setField(afield, new IntField(updateCounter));
                     }
                 }
             }

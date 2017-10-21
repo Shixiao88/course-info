@@ -29,14 +29,14 @@ public class InsertTest extends TestUtil.CreateHeapFile {
                     3, 4,
                     3, 6,
                     5, 7 });
-    this.tid = new TransactionId();
+    tid = new TransactionId();
   }
 
   /**
    * Unit test for Insert.getTupleDesc()
    */
   @Test public void getTupleDesc() throws Exception {
-    Insert op = new Insert(tid, scan1, empty.getId());
+    Insert op = new Insert(tid,scan1, empty.getId());
     TupleDesc expected = Utility.getTupleDesc(1);
     TupleDesc actual = op.getTupleDesc();
     assertEquals(expected, actual);
@@ -46,7 +46,7 @@ public class InsertTest extends TestUtil.CreateHeapFile {
    * Unit test for Insert.getNext(), inserting elements into an empty file
    */
   @Test public void getNext() throws Exception {
-    Insert op = new Insert(tid, scan1, empty.getId());
+    Insert op = new Insert(tid,scan1, empty.getId());
     op.open();
     assertTrue(TestUtil.compareTuples(
         Utility.getHeapTuple(7, 1), // the length of scan1

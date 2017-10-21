@@ -10,7 +10,10 @@ public class Join extends Operator {
     private DbIterator right_inner;
     private TupleDesc joined_td;
     private TupleDesc td1;
+    private TupleDesc td2;
     private Tuple t_outer;
+
+    private static final long serialVersionUID = 1L;
 
     /**
      * Constructor.  Accepts to children to join and the predicate
@@ -27,7 +30,33 @@ public class Join extends Operator {
         TupleDesc td1_outer = left_outer.getTupleDesc();
         td1 = td1_outer;
         TupleDesc td2_innter = right_inner.getTupleDesc();
+        td2 = td2_innter;
         joined_td = TupleDesc.merge(td1_outer, td2_innter);
+    }
+
+    public JoinPredicate getJoinPredicate() {
+        // some code goes here
+        return jp;
+    }
+
+    /**
+     * @return
+     *       the field name of join field1. Should be quantified by
+     *       alias or table name.
+     * */
+    public String getJoinField1Name() {
+        // some code goes here
+        return td1.getFieldName(jp.getField1());
+    }
+
+    /**
+     * @return
+     *       the field name of join field2. Should be quantified by
+     *       alias or table name.
+     * */
+    public String getJoinField2Name() {
+        // some code goes here
+        return td2.getFieldName(jp.getField2());
     }
 
     /**
@@ -40,6 +69,7 @@ public class Join extends Operator {
     public void open()
         throws DbException, NoSuchElementException, TransactionAbortedException {
         try {
+            super.open();
             left_outer.open();
             right_inner.open();
             if (left_outer.hasNext()) {
@@ -51,6 +81,7 @@ public class Join extends Operator {
     }
 
     public void close() {
+        super.close();
         left_outer.close();
         right_inner.close();
     }
@@ -113,5 +144,18 @@ public class Join extends Operator {
             e.printStackTrace();
             throw e;
         }
+    }
+
+    @Override
+    public DbIterator[] getChildren() {
+        // some code goes here
+        return new DbIterator[]{left_outer, right_inner};
+    }
+
+    @Override
+    public void setChildren(DbIterator[] children) {
+        // some code goes here
+        left_outer = children[0];
+        right_inner = children[1];
     }
 }

@@ -30,7 +30,6 @@ public class BufferPool {
 
     private ArrayList<Page> pageList ;
     private int max_page_num;
-    private ConcurrencyBoard markBoard;
 
     /**
      * Creates a BufferPool that caches up to numPages pages.
@@ -42,7 +41,6 @@ public class BufferPool {
     public BufferPool(int numPages) {
         pageList = new ArrayList<>();
         max_page_num = numPages;
-        markBoard = new ConcurrencyBoard();
     }
     
     public static int getPageSize() {
@@ -75,68 +73,22 @@ public class BufferPool {
      * @param perm the requested permissions on the page
      */
     public Page getPage(TransactionId tid, PageId pid, Permissions perm)
-        throws TransactionAbortedException, DbException {
-        final PageLockId lockid = new PageLockId(tid, pid, perm);
-        final PageLock lock = new PageLock(lockid);
-        while (true) {
-            int res = markBoard.addPageLock(tid, pid, lockid);
-            if (res < 0) {
-                /*
-                * the producer, consumer model, where to establish?
-                * */
-                //on hold, loop to sleep
-                try {
-                    markBoard.putLockOnHold(lockid);
-                    PageLock lock = new PageLock(lockid);
-                    Thread.sleep(WAIT_TIME);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                    return null;
-                }
-            } else {
-                markBoard.addTranLockPair(tid, lockid);
-                PageLock lock = new PageLock(lockid);
-                for (Page pg : pageList) {
-                    if (pg.getId().equals(pid)) {
-                        return pg;
-                    }
-                }
-                DbFile dbfile = Database.getCatalog().getDbFile(pid.getTableId());
-                Page noExistPage = dbfile.readPage(pid);
-                if (pageList.size() < max_page_num) {
-                    pageList.add(pageList.size(), noExistPage);
-                    return noExistPage;
-                } else {
-            /*Eviction Policy afterwards */
-                    evictPage();
-                    pageList.add(pageList.size(), noExistPage);
-                    return noExistPage;
-                }
+            throws TransactionAbortedException, DbException {
+        for (Page pg : pageList) {
+            if (pg.getId().equals(pid)) {
+                return pg;
             }
         }
-    }
-
-    /**
-     * the common function to lock the page with such transaction id
-     * need to think about the lock stage to avoid race condition
-     * */
-    synchronized LockId lockPage(TransactionId tid, PageId pid, Permissions perm) {
-        PageLockId lid = new PageLockId(tid, pid, perm);
-        PageLock lock = new PageLock(lid);
-        while (true) {
-            try {
-                int res = markBoard.addPageLockPair(pid, lid);
-                if (res < 0) {
-                    Thread.sleep(WAIT_TIME);
-                    markBoard.putLockOnHold(lid);
-                } else {
-                    markBoard.releaseLockOnHold(lid);
-                    lock.open();
-                    markBoard.addTranLockPair(tid, lid);
-
-                }
-            } catch (java.lang.InterruptedException e) {
-            }
+        DbFile dbfile = Database.getCatalog().getDbFile(pid.getTableId());
+        Page noExistPage = dbfile.readPage(pid);
+        if (pageList.size() < max_page_num) {
+            pageList.add(pageList.size(), noExistPage);
+            return noExistPage;
+        } else {
+            /*Eviction Policy afterwards */
+            evictPage();
+            pageList.add(pageList.size(), noExistPage);
+            return noExistPage;
         }
     }
 
@@ -152,7 +104,6 @@ public class BufferPool {
     public  void releasePage(TransactionId tid, PageId pid) {
         // some code goes here
         // not necessary for lab1|lab2
-        ArrayList<LockId> lockid = markBoard.getLockIdByPid(pid);
     }
 
     /**
@@ -169,8 +120,7 @@ public class BufferPool {
     public boolean holdsLock(TransactionId tid, PageId p) {
         // some code goes here
         // not necessary for lab1|lab2
-        Lock lock = getLock(tid, p);
-        return lock != null;
+        return false;
     }
 
     /**
@@ -206,6 +156,9 @@ public class BufferPool {
         ArrayList<Page> plst = f.insertTuple(tid, t);
         for (Page p : plst) {
             p.markDirty(true, tid);
+            /* FORCE policy, write the dirty page back to the disk and unmark the dirty page */
+            f.writePage(p);
+            p.markDirty(false, tid);
         }
         return;
     }

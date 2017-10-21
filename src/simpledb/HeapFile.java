@@ -1,11 +1,7 @@
 package simpledb;
 
-import org.omg.SendingContext.RunTime;
-
 import javax.xml.crypto.Data;
 import java.io.*;
-import java.lang.reflect.Array;
-import java.nio.Buffer;
 import java.util.*;
 
 /**
@@ -45,7 +41,7 @@ public class HeapFile implements DbFile {
      * @return the File backing this HeapFile on disk.
      */
     public File getFile() {
-        return this.file;
+        return file;
     }
 
     /**
@@ -58,7 +54,7 @@ public class HeapFile implements DbFile {
      * @return an ID uniquely identifying this HeapFile.
      */
     public int getId() {
-        return this.fileId;
+        return fileId;
     }
 
     /**
@@ -106,6 +102,7 @@ public class HeapFile implements DbFile {
      */
     public int numPages() {
         int pageSize = BufferPool.getPageSize();
+        long l = file.length();
         int pageNum = (int)Math.floor((int) file.length()) / (pageSize);
         return pageNum;
     }
@@ -115,6 +112,7 @@ public class HeapFile implements DbFile {
         throws DbException, IOException, TransactionAbortedException {
         ArrayList<Page> insertPages = new ArrayList<>();
         int pno = numPages();
+        boolean foundEmpty = false;
         for (int i = 0; i < pno; i += 1) {
             HeapPage heapPage = (HeapPage)Database.getBufferPool().getPage(
                     tid, new HeapPageId(getId(), i), Permissions.READ_WRITE);
@@ -122,6 +120,8 @@ public class HeapFile implements DbFile {
                 //find a page with empty slot, insert into this empty slot and write to the file
                 heapPage.insertTuple(t);
                 insertPages.add(heapPage);
+                foundEmpty = true;
+                break;
                 /*RandomAccessFile raf = new RandomAccessFile(file, "rw");
                 raf.seek((long)i * BufferPool.getPageSize());
                 raf.write(heapPage.getPageData());
@@ -131,11 +131,13 @@ public class HeapFile implements DbFile {
                 continue;
             }
         }
-        // if no page with empty slots, create a new page and append to the end of file
-        byte[] newEmptyData = HeapPage.createEmptyPageData();
-        HeapPage hp = new HeapPage(new HeapPageId(getId(), pno + 1), newEmptyData);
-        hp.insertTuple(t);
-        insertPages.add(hp);
+        if (!foundEmpty) {
+            // if no page with empty slots, create a new page and append to the end of file
+            byte[] newEmptyData = HeapPage.createEmptyPageData();
+            HeapPage hp = new HeapPage(new HeapPageId(getId(), pno + 1), newEmptyData);
+            hp.insertTuple(t);
+            insertPages.add(hp);
+        }
         /*try {
             FileOutputStream fout = new FileOutputStream(file, true);
             fout.write(hp.getPageData());

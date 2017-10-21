@@ -34,4 +34,19 @@ public class JoinPredicate {
         Predicate pdc = new Predicate(fd1, operator, t2.getField(fd2));
         return pdc.filter(t1);
     }
+
+    public int getField1()
+    {
+        return fd1;
+    }
+
+    public int getField2()
+    {
+        return fd2;
+    }
+
+    public Predicate.Op getOperator()
+    {
+        return operator;
+    }
 }

@@ -1,16 +1,15 @@
 package simpledb;
 
-import org.omg.CORBA.INTF_REPOS;
-
 import java.util.ArrayList;
 import java.util.Iterator;
-import java.util.ListIterator;
-import java.util.Map;
 
 /**
  * Knows how to compute some aggregate over a set of IntFields.
  */
 public class IntegerAggregator implements Aggregator {
+
+    private static final long serialVersionUID = 1L;
+
     private final int gbfindex;
     private final int afield;
     private final Type gbfieldtype;
@@ -42,7 +41,10 @@ public class IntegerAggregator implements Aggregator {
     public void mergeTupleIntoGroup(Tuple tup) {
         int groupedVal = 1;
         int groupedIndex = 0;
-        int groupedValTuple = ((IntField)tup.getField(afield)).getValue();
+        int groupedValTuple  = 0;
+        if (tup.getTupleDesc().getFieldType(afield) == Type.INT_TYPE) {
+            groupedValTuple = ((IntField) tup.getField(afield)).getValue();
+        }
         if (gbfindex == Aggregator.NO_GROUPING) {
            needGroup = false;
            for (int[] ints : intlist) {
