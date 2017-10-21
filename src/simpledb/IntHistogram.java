@@ -46,11 +46,14 @@ public class IntHistogram {
         this.interval = (max + 1 - min) / (double)buckets;
         histogram = new HashMap<>();
         for (int i = 0; i < numBuckets; i += 1) {
-            histogram.put(i, new ArrayList<>());
+            histogram.put(i, new ArrayList<Integer>());
         }
     }
 
-    private int getBuckteIndexByValue (int v) {
+    private int getBucketIndexByValue (int v) {
+        /*
+         * do not consider overflow
+         */
         return (int)((v - min) / interval);
     }
 
@@ -65,7 +68,7 @@ public class IntHistogram {
          * if v is less than min or larger than max, create a new range for it;
          * */
         if (v >= min && v <= max) {
-            int vIndex = getBuckteIndexByValue(v);
+            int vIndex = getBucketIndexByValue(v);
             ArrayList<Integer> itemsInBucktes = histogram.get(vIndex);
             itemsInBucktes.add(v);
             histogram.put(vIndex, itemsInBucktes);
@@ -113,10 +116,39 @@ public class IntHistogram {
         }
     }
 
+    /**
+     * Xiao:
+     * helper checker function to adjust the number of buckets per the following functions question.
+     *
+     * */
+    private void checkNumBuckets() {
+
+    }
+
     private double estimateEqualSelectivity(Predicate.Op op, int v) {
+
+        /** Xiao:
+         * during unit test found some worth noted:
+         * if max - min range is lower than number of bucket,
+         * meaning that integer will only fall into some of the buckets, left the rest empty
+         * for example:
+         * 0 - 31, with 100 buckets.
+         * some of the interval will be 0.31 - 0.62, there will be no integer at all in fall into these range.
+         *
+         * do I need to readjust the number of buckets of ensure that there is no purely float range?
+         * or i need to readjust the interval to be 1.0 if it is smaller than 1.0?
+         *
+         * */
+
+        checkNumBuckets();
         if (v >= min && v <= max) {
-            int vIndex = getBuckteIndexByValue(v);
+            int vIndex = getBucketIndexByValue(v);
             int numItemInBucket = (histogram.get(vIndex)).size();
+            double debug = numItemInBucket / interval;
+            double debug2 = debug/numTuples;
+            if (interval < 1.0) {
+                return  (double)numItemInBucket /numTuples;
+            }
             return (numItemInBucket / interval) / numTuples;
         } else {
             return 0.0;
@@ -124,8 +156,9 @@ public class IntHistogram {
     }
 
     private double estimateLargerSelectivity(Predicate.Op op, int v) {
+        checkNumBuckets();
         if (v >= min && v <= max) {
-            int vIndex = getBuckteIndexByValue(v);
+            int vIndex = getBucketIndexByValue(v);
             int numItemInBucket = (histogram.get(vIndex)).size();
             double maxInBucket = min + (vIndex * interval);
             double numInCurrentBucket = numItemInBucket * ((maxInBucket - v) / interval);

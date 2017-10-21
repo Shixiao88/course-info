@@ -1,5 +1,7 @@
 package simpledb;
 
+import org.omg.CORBA.TRANSACTION_MODE;
+
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
@@ -7,6 +9,14 @@ import java.util.concurrent.ConcurrentHashMap;
 
 /** TableStats represents statistics (e.g., histograms) about base tables in a query */
 public class TableStats {
+
+    /** my written method */
+    private DbFile table;
+    private int[] minValPerColume;
+    private int[] maxValPerColume;
+    private int numTuples;
+    private int ioCostPerPage;
+    /*********************/
 
     private static final ConcurrentHashMap<String, TableStats> statsMap = new ConcurrentHashMap<String, TableStats>();
 
@@ -80,6 +90,36 @@ public class TableStats {
         // necessarily have to (for example) do everything
         // in a single scan of the table.
         // some code goes here
+        this.ioCostPerPage = ioCostPerPage;
+        this.table = Database.getCatalog().getDbFile(tableid);
+        int numCol = table.getTupleDesc().numFields();
+        minValPerColume = new int[numCol];
+        maxValPerColume = new int[numCol];
+        numTuples = 0;
+        for (int i = 0; i < numCol; i += 1) {
+            minValPerColume[i] = Integer.MAX_VALUE;
+            maxValPerColume[i] = Integer.MIN_VALUE;
+        }
+        SeqScan scanTable = new SeqScan(new TransactionId(), tableid);
+        try {
+            scanTable.open();
+            while (scanTable.hasNext()) {
+                numTuples += 1;
+                Tuple t = scanTable.next();
+                for (int i = 0; i < numCol; i += 1) {
+                    int tupleColValue = ((IntField)t.getField(i)).getValue();
+                    if (minValPerColume[i] > tupleColValue) {
+                        minValPerColume[i] = tupleColValue;
+                    } else if (maxValPerColume[i] < tupleColValue) {
+                        maxValPerColume[i] = tupleColValue;
+                    }
+                }
+            }
+        } catch (TransactionAbortedException | DbException e) {
+            e.printStackTrace();
+            return;
+        }
+
     }
 
     /**
@@ -96,7 +136,8 @@ public class TableStats {
      */
     public double estimateScanCost() {
         // some code goes here
-        return 0;
+        int numPage = ((HeapFile) table).numPages();
+        return numPage * ioCostPerPage;
     }
 
     /**
@@ -110,7 +151,7 @@ public class TableStats {
      */
     public int estimateTableCardinality(double selectivityFactor) {
         // some code goes here
-        return 0;
+        return (int)(numTuples * selectivityFactor);
     }
 
     /**
@@ -123,9 +164,24 @@ public class TableStats {
      * tuple, of which we do not know the value of the field, return the
      * expected selectivity. You may estimate this value from the histograms.
      * */
+
+    /* choose the middle value as constant value, assuming that
+     * the values are evenly distributed.
+     * this is not tested, not sure if it is correct */
     public double avgSelectivity(int field, Predicate.Op op) {
         // some code goes here
-        return 1.0;
+        Type t = table.getTupleDesc().getFieldType(field);
+        if (t.equals(Type.INT_TYPE)) {
+            int avgCons = minValPerColume[field] +
+                    (int)((maxValPerColume[field] - minValPerColume[field]) / 2.0);
+            IntHistogram ihg = new IntHistogram(NUM_HIST_BINS, minValPerColume[field], maxValPerColume[field]);
+            return ihg.estimateSelectivity(op, avgCons);
+        } else {
+            String avgCons = String.valueOf(minValPerColume[field] +
+                    (int)((maxValPerColume[field] - minValPerColume[field]) / 2.0));
+            StringHistogram shg = new StringHistogram(NUM_HIST_BINS);
+            return shg.estimateSelectivity(op, avgCons);
+        }
     }
 
     /**
@@ -141,9 +197,34 @@ public class TableStats {
      * @return The estimated selectivity (fraction of tuples that satisfy) the
      *         predicate
      */
-    public double estimateSelectivity(int field, Predicate.Op op, Field constant) {
+    public double estimateSelectivity (int field, Predicate.Op op, Field constant) {
         // some code goes here
-        return 1.0;
+        Type t = table.getTupleDesc().getFieldType(field);
+        if (t.equals(Type.INT_TYPE)) {
+            IntHistogram ihg = new IntHistogram(NUM_HIST_BINS, minValPerColume[field], maxValPerColume[field]);
+            SeqScan scanTable = new SeqScan(new TransactionId(), table.getId());
+            try {
+                scanTable.open();
+                while (scanTable.hasNext()) {
+                    ihg.addValue(((IntField)scanTable.next().getField(field)).getValue());
+                }
+            } catch (DbException | TransactionAbortedException e) {
+                e.printStackTrace();
+            }
+            return ihg.estimateSelectivity(op, ((IntField)constant).getValue());
+        } else {
+            StringHistogram shg = new StringHistogram(NUM_HIST_BINS);
+            SeqScan scanTable = new SeqScan(new TransactionId(), table.getId());
+            try {
+                scanTable.open();
+                while (scanTable.hasNext()) {
+                    shg.addValue(((StringField)scanTable.next().getField(field)).getValue());
+                }
+            } catch (DbException | TransactionAbortedException e) {
+                e.printStackTrace();
+            }
+            return shg.estimateSelectivity(op, ((StringField)constant).getValue());
+        }
     }
 
     /**
@@ -151,7 +232,7 @@ public class TableStats {
      * */
     public int totalTuples() {
         // some code goes here
-        return 0;
+        return numTuples;
     }
 
 }
