@@ -1,9 +1,13 @@
 package simpledb;
 
+import com.sun.org.apache.bcel.internal.generic.TABLESWITCH;
+import sun.rmi.log.LogOutputStream;
+
 import java.util.*;
 
 import javax.swing.*;
 import javax.swing.tree.*;
+import javax.xml.crypto.Data;
 
 /**
  * The JoinOptimizer class is responsible for ordering a series of joins
@@ -111,7 +115,7 @@ public class JoinOptimizer {
             // HINT: You may need to use the variable "j" if you implemented
             // a join algorithm that's more complicated than a basic
             // nested-loops join.
-            return -1.0;
+            return cost1 + card1 * (cost2) + card1 * card2;
         }
     }
 
@@ -157,7 +161,22 @@ public class JoinOptimizer {
             Map<String, Integer> tableAliasToId) {
         int card = 1;
         // some code goes here
-        return card <= 0 ? 1 : card;
+        /*
+         * if is equality join
+        * */
+        if (joinOp.equals(Predicate.Op.EQUALS)) {
+            if (t1pkey) {
+                return card1;
+            } else if (t2pkey) {
+                return card2;
+            } else {
+                return card1 >= card2 ? card1 : card2;
+            }
+        } else {
+            return card1 >= card2 ? (int)(card1 + card2 * 0.7) : (int)(card2 + card1 * 0.7);
+        }
+
+        //return card <= 0 ? 1 : card;
     }
 
     /**
@@ -221,7 +240,62 @@ public class JoinOptimizer {
 
         // some code goes here
         //Replace the following
-        return joins;
+
+        int joinTableSize = stats.size();
+        /*
+        * Selinger algo:
+        * for (i in 1...|j|):
+        * */
+        PlanCache pc = new PlanCache();
+        // for base case when i is 1
+        pc.addPlan(new HashSet<>(), Double.POSITIVE_INFINITY, Integer.MAX_VALUE, new Vector<>());
+
+        // add the original joinOrder which is randomly selected, with infinite cost and card
+        for (int i = 1; i <= joinTableSize; i += 1) {
+            Set<Set<LogicalJoinNode>> ithSubJNSetsSets =
+                    enumerateSubsets(joins, i);
+            /*
+            * Selinger algo:
+            * for s in {all length i subsets of j}
+            * bestPlan = {}
+            * */
+            for (Set<LogicalJoinNode> ithJNsets: ithSubJNSetsSets) {
+                pc.addPlan(ithJNsets, Double.POSITIVE_INFINITY, Integer.MAX_VALUE, new Vector<>(ithJNsets));
+                //bestCostCardSoFar.cost = Double.POSITIVE_INFINITY;
+                //bestCostCardSoFar.card = Integer.MAX_VALUE;
+                /*
+                * Selinger algo:
+                * for s' in {all length d-1 subsets of s}
+                * subplan = optjoin(s')
+                * plan = best way to join (s-s') to subplan
+                * if (cost(plan) < cost(bestPlan))
+                * bestPlan = plan
+                * */
+                for (LogicalJoinNode jn : ithJNsets) {
+                    double ithSubBestCostSoFar = Double.POSITIVE_INFINITY;
+                    // get the set without the removed join node
+                    Set<LogicalJoinNode> subPlan = new HashSet<>();
+                    subPlan.addAll(ithJNsets);
+                    subPlan.remove(jn);
+                    double subBestCostSoFar = pc.getCost(subPlan);
+                    CostCard costCard = computeCostAndCardOfSubplan(stats, filterSelectivities,
+                            jn, ithJNsets, subBestCostSoFar, pc);
+                    // the costCard could be null
+                    if (costCard != null) {
+                        if (costCard.cost < ithSubBestCostSoFar) {
+                            ithSubBestCostSoFar = costCard.cost;
+                            Vector<LogicalJoinNode> subBestOrderSoFar = costCard.plan;
+                            pc.addPlan(ithJNsets, ithSubBestCostSoFar, costCard.card, subBestOrderSoFar);
+                        }
+                    }
+                }
+            }
+        }
+        Vector<LogicalJoinNode> optimalOrder = pc.getOrder(new HashSet<>(joins));
+        if (explain) {
+            printJoins(optimalOrder, pc, stats, filterSelectivities);
+        }
+        return optimalOrder;
     }
 
     // ===================== Private Methods =================================
