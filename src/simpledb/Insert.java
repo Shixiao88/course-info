@@ -12,7 +12,7 @@ public class Insert extends Operator {
     private TransactionId tid;
     private DbIterator feediter;
     private int tableId;
-    private DbFileIter hpiter;
+    private DbFileIterator hpiter;
     private boolean isDone;
 
     /**
@@ -31,7 +31,7 @@ public class Insert extends Operator {
             this.feediter = child;
             this.tableId = tableid;
             HeapFile hpfile = (HeapFile) Database.getCatalog().getDbFile(tableid);
-            hpiter = (DbFileIter)hpfile.iterator(tid);
+            hpiter = (DbFileIterator) hpfile.iterator(tid);
             isDone = false;
         } else {
             throw new DbException("tuple description is not correspondent");

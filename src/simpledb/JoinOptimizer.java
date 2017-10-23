@@ -242,15 +242,17 @@ public class JoinOptimizer {
         //Replace the following
 
         int joinTableSize = stats.size();
-        /*
-        * Selinger algo:
-        * for (i in 1...|j|):
-        * */
+
         PlanCache pc = new PlanCache();
         // for base case when i is 1
         pc.addPlan(new HashSet<>(), Double.POSITIVE_INFINITY, Integer.MAX_VALUE, new Vector<>());
 
         // add the original joinOrder which is randomly selected, with infinite cost and card
+
+        /*
+        * Selinger algo:
+        * for (i in 1...|j|):
+        * */
         for (int i = 1; i <= joinTableSize; i += 1) {
             Set<Set<LogicalJoinNode>> ithSubJNSetsSets =
                     enumerateSubsets(joins, i);
@@ -259,10 +261,12 @@ public class JoinOptimizer {
             * for s in {all length i subsets of j}
             * bestPlan = {}
             * */
+
             for (Set<LogicalJoinNode> ithJNsets: ithSubJNSetsSets) {
                 pc.addPlan(ithJNsets, Double.POSITIVE_INFINITY, Integer.MAX_VALUE, new Vector<>(ithJNsets));
-                //bestCostCardSoFar.cost = Double.POSITIVE_INFINITY;
-                //bestCostCardSoFar.card = Integer.MAX_VALUE;
+                double ithSubBestCostSoFar = Double.POSITIVE_INFINITY;
+                int ithSubBestCarSoFar = Integer.MAX_VALUE;
+                Vector<LogicalJoinNode> ithSubBestOrderSoFar = new Vector<>(ithJNsets);
                 /*
                 * Selinger algo:
                 * for s' in {all length d-1 subsets of s}
@@ -272,23 +276,23 @@ public class JoinOptimizer {
                 * bestPlan = plan
                 * */
                 for (LogicalJoinNode jn : ithJNsets) {
-                    double ithSubBestCostSoFar = Double.POSITIVE_INFINITY;
                     // get the set without the removed join node
                     Set<LogicalJoinNode> subPlan = new HashSet<>();
                     subPlan.addAll(ithJNsets);
                     subPlan.remove(jn);
-                    double subBestCostSoFar = pc.getCost(subPlan);
+                    double prevSubBestCostSoFar = pc.getCost(subPlan);
                     CostCard costCard = computeCostAndCardOfSubplan(stats, filterSelectivities,
-                            jn, ithJNsets, subBestCostSoFar, pc);
+                            jn, ithJNsets, ithSubBestCostSoFar, pc);
                     // the costCard could be null
                     if (costCard != null) {
                         if (costCard.cost < ithSubBestCostSoFar) {
                             ithSubBestCostSoFar = costCard.cost;
-                            Vector<LogicalJoinNode> subBestOrderSoFar = costCard.plan;
-                            pc.addPlan(ithJNsets, ithSubBestCostSoFar, costCard.card, subBestOrderSoFar);
+                            ithSubBestOrderSoFar = costCard.plan;
+                            ithSubBestCarSoFar = costCard.card;
                         }
                     }
                 }
+                pc.addPlan(ithJNsets, ithSubBestCostSoFar, ithSubBestCarSoFar, ithSubBestOrderSoFar);
             }
         }
         Vector<LogicalJoinNode> optimalOrder = pc.getOrder(new HashSet<>(joins));
