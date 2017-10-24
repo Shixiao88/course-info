@@ -1,7 +1,7 @@
 package simpledb;
 
 import java.io.*;
-
+import java.util.*;
 import java.util.ArrayList;
 
 /**
@@ -28,8 +28,9 @@ public class BufferPool {
 
     public static final int WAIT_TIME = 10;
 
-    private ArrayList<Page> pageList ;
+    private List<Page> pageList ;
     private int max_page_num;
+    public LockControlBoard controlBoard;
 
     /**
      * Creates a BufferPool that caches up to numPages pages.
@@ -39,8 +40,9 @@ public class BufferPool {
      * when launch a new bufferpool, create a new board.
      */
     public BufferPool(int numPages) {
-        pageList = new ArrayList<>();
+        pageList = Collections.synchronizedList(new LinkedList<Page>());
         max_page_num = numPages;
+        controlBoard = new LockControlBoard();
     }
     
     public static int getPageSize() {
@@ -76,11 +78,15 @@ public class BufferPool {
             throws TransactionAbortedException, DbException {
         for (Page pg : pageList) {
             if (pg.getId().equals(pid)) {
-                return pg;
+                lockPage(tid, pid, perm);
+                moveAroundPage(pg);
+                break;
             }
         }
+        // if the page is not in bufferpool, there must be no lock on it
         DbFile dbfile = Database.getCatalog().getDbFile(pid.getTableId());
         Page noExistPage = dbfile.readPage(pid);
+        lockPage(tid, pid, perm);
         if (pageList.size() < max_page_num) {
             pageList.add(pageList.size(), noExistPage);
             return noExistPage;
@@ -90,6 +96,36 @@ public class BufferPool {
             pageList.add(pageList.size(), noExistPage);
             return noExistPage;
         }
+    }
+
+    private void lockPage(TransactionId tid, PageId pid, Permissions perm)
+            throws DbException, TransactionAbortedException{
+        Lock lock;
+        if (perm == Permissions.READ_ONLY) {
+                lock = new Lock(tid, pid, Lock.LOCKTYPE.SHARE_LOCK);
+            } else {
+                lock = new Lock(tid, pid, Lock.LOCKTYPE.EXCLUSIVE_LOCK);
+            }
+        while (true) {
+            int res = lock.inilize(pid, controlBoard);
+            if (res > 0) {
+                return;
+            } else {
+                continue;
+            }
+        }
+    }
+
+    /**
+     * serve for evistion policy
+     * whenever a page is get accessed
+     * move it to the very last of the list.
+     *
+     * */
+    private void moveAroundPage(Page pg) {
+       pageList.remove(pg);
+       pageList.add(pageList.size(), pg);
+       return;
     }
 
     /**
@@ -104,6 +140,7 @@ public class BufferPool {
     public  void releasePage(TransactionId tid, PageId pid) {
         // some code goes here
         // not necessary for lab1|lab2
+        controlBoard.closeLockDG(tid, pid);
     }
 
     /**
@@ -114,13 +151,15 @@ public class BufferPool {
     public void transactionComplete(TransactionId tid) throws IOException {
         // some code goes here
         // not necessary for lab1|lab2
+
+        controlBoard.closeLock(tid);
     }
 
     /** Return true if the specified transaction has a lock on the specified page */
     public boolean holdsLock(TransactionId tid, PageId p) {
         // some code goes here
         // not necessary for lab1|lab2
-        return false;
+        return controlBoard.holdsLock(tid, p);
     }
 
     /**
@@ -214,7 +253,7 @@ public class BufferPool {
      * Flushes a certain page to disk
      * @param pid an ID indicating the page to flush
      */
-    private synchronized  void flushPage(PageId pid) throws IOException {
+    private synchronized void flushPage(PageId pid) throws IOException {
         for (Page pg : pageList) {
             if (pg.getId().equals(pid)) {
                 if (pg.isDirty() != null) {
@@ -240,9 +279,34 @@ public class BufferPool {
      *  LRU
      *  implementation detail:
      *  FIFO for arraylist.
+     *
+     *  add-on Lock feature:
+     *  if the first is locked(which is not highly possible because is the most ascient page.
+     *  wait for 10 miliseconds and check whatever is the first again(the page list may have been changed by
+     *  other threads)
+     *  if the first is free, then remove it (I believe that the check lock then delete should be thread safe,
+     *  so I add a synchronized block to protect it, is it a check-then-apply mode?)
      */
-    private synchronized  void evictPage() throws DbException {
-        Page removePage = pageList.remove(0);
+    private void evictPage() throws DbException {
+        Page removePage;
+        try {
+            while (true) {
+                synchronized (this) {
+                    Page intentRmPage = pageList.get(0);
+                    if (controlBoard.isPageLocked(intentRmPage.getId())) {
+                        Thread.sleep(10);
+                        continue;
+                    } else {
+                        removePage = pageList.remove(0);
+                        break;
+                    }
+                }
+            }
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+            return;
+        }
+
         /*// if the page is the root pointer page in B+Tree, then add to the end of list and delete
         // the next page, as root pointer should not be evicted.
         if (removePage instanceof BTreeRootPtrPage ||
