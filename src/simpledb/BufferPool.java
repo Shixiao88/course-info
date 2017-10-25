@@ -151,8 +151,7 @@ public class BufferPool {
     public void transactionComplete(TransactionId tid) throws IOException {
         // some code goes here
         // not necessary for lab1|lab2
-
-        controlBoard.closeLock(tid);
+        transactionComplete(tid, true);
     }
 
     /** Return true if the specified transaction has a lock on the specified page */
@@ -179,9 +178,20 @@ public class BufferPool {
                     DbFile f = Database.getCatalog().getDbFile(p.getId().getTableId());
                     f.writePage(p);
                     p.markDirty(false, tid);
-                    controlBoard.closeLockDG(tid, p.getId());
                 }
             }
+            controlBoard.closeLock(tid);
+        }
+        // if it is aborted, then delete all dirty page, need to get from disk if
+        // it is asked again, which is unchanged
+        else {
+            List<Page> pageListCopy = Collections.synchronizedList(new LinkedList<>());
+            for (Page p : pageList) {
+                if (p.isDirty() == null) {
+                    pageListCopy.add(pageListCopy.size(), p);
+                }
+            }
+            pageList = pageListCopy;
         }
 
     }
@@ -296,17 +306,24 @@ public class BufferPool {
      *  FIFO for arraylist.
      *
      *  add-on Lock feature:
-     *  if the first is locked(which is not highly possible because is the most ascient page.
-     *  wait for 10 miliseconds and check whatever is the first again(the page list may have been changed by
-     *  other threads)
-     *  if the first is free, then remove it (I believe that the check lock then delete should be thread safe,
-     *  so I add a synchronized block to protect it, is it a check-then-apply mode?)
+     *  if the page is dirty, because of NO-STEAL policy it is remain in the memory, and check the next page
+     *  if the first is clean, then remove it
+     *  (I believe that the check lock then delete should be thread safe, so I add a synchronized block to protect it,
+     *  is it a check-then-apply mode?)
+     *  the lockControlBoard instance will recorded the read-locked, clean evicted page(this I follow the instructions from the class, but I
+     *  don't know what use is that)
+     *
+     *
+     *  words from the instructions:
+     *  Note that, in general, evicting a clean page that is locked by a running transaction is OK when using NO STEAL,
+     *  as long as your lock manager keeps information about evicted pages around,a
+     *  and as long as none of your operator implementations keep references to Page objects which have been evicted.
      */
     private void evictPage() throws DbException {
         Page removePage = null;
         for (Page intentRmPage : pageList) {
             // if the page is not locked by any page or page is not dirty.
-            if (!(controlBoard.isPageLocked(intentRmPage.getId())) && !(intentRmPage.isDirty() != null)) {
+            if (intentRmPage.isDirty() == null) {
                 removePage = intentRmPage;
                 break;
             }
@@ -315,6 +332,7 @@ public class BufferPool {
             throw new DbException("fail to evit pages");
         } else {
             pageList.remove(removePage);
+            controlBoard.recordCleanEvictPage(removePage.getId());
         }
         try {
             flushPage(removePage.getId());
