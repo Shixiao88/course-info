@@ -99,6 +99,9 @@ public class HeapFile implements DbFile {
 
     /**
      * Returns the number of pages in this HeapFile.
+     *
+     * there might be pages(unchanged) in dist, and pages(changed but not yet
+     * commited) in memory.
      */
     public int numPages() {
         int pageSize = BufferPool.getPageSize();
@@ -122,11 +125,6 @@ public class HeapFile implements DbFile {
                 insertPages.add(heapPage);
                 foundEmpty = true;
                 break;
-                /*RandomAccessFile raf = new RandomAccessFile(file, "rw");
-                raf.seek((long)i * BufferPool.getPageSize());
-                raf.write(heapPage.getPageData());
-                raf.close();
-                return insertPages;*/
             } catch (DbException e) {
                 continue;
             }

@@ -80,7 +80,7 @@ public class BufferPool {
             if (pg.getId().equals(pid)) {
                 lockPage(tid, pid, perm);
                 moveAroundPage(pg);
-                break;
+                return pg;
             }
         }
         // if the page is not in bufferpool, there must be no lock on it
@@ -173,6 +173,17 @@ public class BufferPool {
         throws IOException {
         // some code goes here
         // not necessary for lab1|lab2
+        if (commit) {
+            for (Page p: pageList) {
+                if (p.isDirty() == tid) {
+                    DbFile f = Database.getCatalog().getDbFile(p.getId().getTableId());
+                    f.writePage(p);
+                    p.markDirty(false, tid);
+                    controlBoard.closeLockDG(tid, p.getId());
+                }
+            }
+        }
+
     }
 
     /**
@@ -195,9 +206,13 @@ public class BufferPool {
         ArrayList<Page> plst = f.insertTuple(tid, t);
         for (Page p : plst) {
             p.markDirty(true, tid);
-            /* FORCE policy, write the dirty page back to the disk and unmark the dirty page */
-            f.writePage(p);
-            p.markDirty(false, tid);
+            /* FORCE policy,
+            only when Transaction is Aborted should
+            write the dirty page back to the disk and unmark the dirty page
+            used in TransactionComplete method.
+            */
+            //f.writePage(p);
+            //p.markDirty(false, tid);
         }
         return;
     }
@@ -294,7 +309,7 @@ public class BufferPool {
                 synchronized (this) {
                     Page intentRmPage = pageList.get(0);
                     if (controlBoard.isPageLocked(intentRmPage.getId())) {
-                        Thread.sleep(10);
+                        Thread.sleep(WAIT_TIME);
                         continue;
                     } else {
                         removePage = pageList.remove(0);
