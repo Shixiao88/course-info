@@ -3,9 +3,6 @@
   <component name="ChangeListManager">
     <list default="true" id="0c451e69-2312-45ae-94c8-4a17724641a2" name="Default" comment="">
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/simpledb/BufferPool.java" afterPath="$PROJECT_DIR$/src/simpledb/BufferPool.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/simpledb/HeapFile.java" afterPath="$PROJECT_DIR$/src/simpledb/HeapFile.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/simpledb/LockControlBoard.java" afterPath="$PROJECT_DIR$/src/simpledb/LockControlBoard.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/test/simpledb/LockingTest.java" afterPath="$PROJECT_DIR$/test/simpledb/LockingTest.java" />
     </list>
     <ignored path="$PROJECT_DIR$/out/" />
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
@@ -59,11 +56,11 @@
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="BufferPool.java" pinned="false" current-in-tab="false">
+      <file leaf-file-name="BufferPool.java" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/src/simpledb/BufferPool.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="96">
-              <caret line="109" column="0" lean-forward="false" selection-start-line="109" selection-start-column="0" selection-end-line="109" selection-end-column="0" />
+            <state relative-caret-position="1168">
+              <caret line="359" column="5" lean-forward="false" selection-start-line="359" selection-start-column="5" selection-end-line="359" selection-end-column="5" />
               <folding>
                 <element signature="imports" expanded="true" />
               </folding>
@@ -91,7 +88,7 @@
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="LockControlBoard.java" pinned="false" current-in-tab="true">
+      <file leaf-file-name="LockControlBoard.java" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/src/simpledb/LockControlBoard.java">
           <provider selected="true" editor-type-id="text-editor">
             <state relative-caret-position="119">
@@ -199,9 +196,9 @@
         <option value="$PROJECT_DIR$/src/simpledb/LockId.java" />
         <option value="$PROJECT_DIR$/src/simpledb/Lock.java" />
         <option value="$PROJECT_DIR$/test/simpledb/LockingTest.java" />
-        <option value="$PROJECT_DIR$/src/simpledb/BufferPool.java" />
         <option value="$PROJECT_DIR$/src/simpledb/HeapFile.java" />
         <option value="$PROJECT_DIR$/src/simpledb/LockControlBoard.java" />
+        <option value="$PROJECT_DIR$/src/simpledb/BufferPool.java" />
       </list>
     </option>
   </component>
@@ -896,7 +893,7 @@
       <workItem from="1508725912514" duration="9674000" />
       <workItem from="1508747680074" duration="49000" />
       <workItem from="1508806896828" duration="22030000" />
-      <workItem from="1508896230498" duration="7455000" />
+      <workItem from="1508896230498" duration="8014000" />
     </task>
     <servers />
   </component>
@@ -933,7 +930,7 @@
     </history-entry>
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="377014000" />
+    <option name="totallyTimeSpent" value="377573000" />
   </component>
   <component name="TodoView">
     <todo-panel id="selected-file">
@@ -967,7 +964,7 @@
       <window_info id="Image Layers" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="Capture Analysis" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="Version Control" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.3290441" sideWeight="0.5" order="11" side_tool="false" content_ui="tabs" />
-      <window_info id="Run" active="true" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.5253683" sideWeight="0.4935275" order="3" side_tool="false" content_ui="tabs" />
+      <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.5253683" sideWeight="0.4935275" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="CheckStyle" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.3290441" sideWeight="0.5" order="9" side_tool="false" content_ui="tabs" />
       <window_info id="Style Checker" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="12" side_tool="false" content_ui="tabs" />
       <window_info id="Terminal" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.502455" sideWeight="0.5" order="13" side_tool="false" content_ui="tabs" />
@@ -1513,16 +1510,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/simpledb/BufferPool.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="96">
-          <caret line="109" column="0" lean-forward="false" selection-start-line="109" selection-start-column="0" selection-end-line="109" selection-end-column="0" />
-          <folding>
-            <element signature="imports" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/src/simpledb/Lock.java">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="148">
@@ -1539,6 +1526,16 @@
             <element signature="imports" expanded="true" />
             <element signature="e#3467#3468#0" expanded="true" />
             <element signature="e#3515#3516#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/simpledb/BufferPool.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="1168">
+          <caret line="359" column="5" lean-forward="false" selection-start-line="359" selection-start-column="5" selection-end-line="359" selection-end-column="5" />
+          <folding>
+            <element signature="imports" expanded="true" />
           </folding>
         </state>
       </provider>

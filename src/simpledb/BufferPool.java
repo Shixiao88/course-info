@@ -303,7 +303,26 @@ public class BufferPool {
      *  so I add a synchronized block to protect it, is it a check-then-apply mode?)
      */
     private void evictPage() throws DbException {
-        Page removePage;
+        Page removePage = null;
+        for (Page intentRmPage : pageList) {
+            // if the page is not locked by any page or page is not dirty.
+            if (!(controlBoard.isPageLocked(intentRmPage.getId())) && !(intentRmPage.isDirty() != null)) {
+                removePage = intentRmPage;
+                break;
+            }
+        }
+        if (removePage == null) {
+            throw new DbException("fail to evit pages");
+        } else {
+            pageList.remove(removePage);
+        }
+        try {
+            flushPage(removePage.getId());
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        /*
         try {
             while (true) {
                 synchronized (this) {
@@ -320,7 +339,7 @@ public class BufferPool {
         } catch (InterruptedException e) {
             e.printStackTrace();
             return;
-        }
+        }*/
 
         /*// if the page is the root pointer page in B+Tree, then add to the end of list and delete
         // the next page, as root pointer should not be evicted.
@@ -330,13 +349,14 @@ public class BufferPool {
             pageList.add(pageList.size()-1, removePage);
             removePage = pageList.remove(0);
         }*/
+        /*
         if (removePage.isDirty() != null) {
             try {
                 flushPage(removePage.getId());
             } catch (IOException e) {
                 e.printStackTrace();
             }
-        }
+        }*/
     }
 
 }
