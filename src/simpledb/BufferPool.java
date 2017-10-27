@@ -1,6 +1,7 @@
 package simpledb;
 
 import java.io.*;
+import java.text.MessageFormat;
 import java.util.*;
 import java.util.ArrayList;
 
@@ -26,7 +27,7 @@ public class BufferPool {
     constructor instead. */
     public static final int DEFAULT_PAGES = 50;
 
-    public static final int WAIT_TIME = 10;
+    public static final int DEAD_LOCK_TIME_OUT = 40000;
 
     private List<Page> pageList ;
     private int max_page_num;
@@ -70,6 +71,10 @@ public class BufferPool {
      * space in the buffer pool, an page should be evicted and the new page
      * should be added in its place.
      *
+     * Lock is detected by time, assuming that withing such time limit,
+     * if the lock is not obtained then it is a deadlock, Abort the running
+     * transaction (by @throw the TransactionAbortException)
+     *
      * @param tid the ID of the transaction requesting the page
      * @param pid the ID of the requested page
      * @param perm the requested permissions on the page
@@ -106,7 +111,13 @@ public class BufferPool {
             } else {
                 lock = new Lock(tid, pid, Lock.LOCKTYPE.EXCLUSIVE_LOCK);
             }
+        long timeOutLimit = System.currentTimeMillis() + DEAD_LOCK_TIME_OUT;
         while (true) {
+            // deal with deadlock with time detection and self-borting
+            long timeWaited = timeOutLimit - System.currentTimeMillis();
+            if (timeWaited < 0) {
+                throw new TransactionAbortedException();
+            }
             int res = lock.inilize(pid, controlBoard);
             if (res > 0) {
                 return;

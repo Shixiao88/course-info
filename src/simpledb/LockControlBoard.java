@@ -176,8 +176,11 @@ public class LockControlBoard {
      * */
     public void enableBlockedHandle (PageId pageid) throws DbException,
     TransactionAbortedException {
-        for (Lock l : blockedHandle) {
+        List<Lock> blockedHandleCopy = new ArrayList<>();
+        blockedHandleCopy.addAll(blockedHandle);
+        for (Lock l : blockedHandleCopy) {
             if (l.getPageid().equals(pageid)) {
+                blockedHandle.remove(l);
                 addLock(l.getTid(), pageid, l);
             }
         }
