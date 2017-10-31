@@ -27,7 +27,7 @@ public class BufferPool {
     constructor instead. */
     public static final int DEFAULT_PAGES = 50;
 
-    public static final int DEAD_LOCK_TIME_OUT = 40000;
+    public static final int DEAD_LOCK_TIME_OUT = 4000;
 
     private List<Page> pageList ;
     private int max_page_num;
@@ -159,7 +159,7 @@ public class BufferPool {
      *
      * @param tid the ID of the transaction requesting the unlock
      */
-    public void transactionComplete(TransactionId tid) throws IOException {
+    public synchronized void transactionComplete(TransactionId tid) throws IOException {
         // some code goes here
         // not necessary for lab1|lab2
         transactionComplete(tid, true);
@@ -179,7 +179,7 @@ public class BufferPool {
      * @param tid the ID of the transaction requesting the unlock
      * @param commit a flag indicating whether we should commit or abort
      */
-    public void transactionComplete(TransactionId tid, boolean commit)
+    public synchronized void transactionComplete(TransactionId tid, boolean commit)
         throws IOException {
         // some code goes here
         // not necessary for lab1|lab2
@@ -198,10 +198,11 @@ public class BufferPool {
         else {
             List<Page> pageListCopy = Collections.synchronizedList(new LinkedList<>());
             for (Page p : pageList) {
-                if (p.isDirty() == null) {
+                if (p.isDirty() == null || p.isDirty() != tid) {
                     pageListCopy.add(pageListCopy.size(), p);
                 }
             }
+            controlBoard.closeLock(tid);
             pageList = pageListCopy;
         }
 

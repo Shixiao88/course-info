@@ -53,7 +53,14 @@ public class LockControlBoard {
             }
             // if the writelock and lock to add belongs to different transaction
             // this lock is blocked
-            blockedHandle.add(blockedHandle.size(), lock);
+            /* previously I haven't assumed that the same lock will be asked again and again
+            *  and haven't make blockedHanlde Set-Alike, cause the blockedHanlde list contains
+            *  so many same locks, this reduce a lot of performance and cause me to fail QueryTest
+            *  timeout limit, and cause the deadlock test run formever.
+            * */
+            if (!blockedHandle.contains(lock)) {
+                blockedHandle.add(blockedHandle.size(), lock);
+            }
             return -1;
         }
         // if page does not have lock or has only read lock
@@ -110,8 +117,8 @@ public class LockControlBoard {
             throw new DbException("close lock error: lock does not corresponding to transaction or page ID");
         }
         if (lock.getType() == Lock.LOCKTYPE.EXCLUSIVE_LOCK) {
-            enableBlockedHandle(pageid);
             pageWriteLockMap.remove(pageid);
+            enableBlockedHandle(pageid);
         }
         List<Lock> locksOnTrans = tranLockMap.get(tid);
         if (locksOnTrans != null) {
@@ -127,6 +134,9 @@ public class LockControlBoard {
 
     public synchronized void closeLock (TransactionId tid) {
         List<Lock> locksOnTrans = tranLockMap.get(tid);
+        if (locksOnTrans == null) {
+            return;
+        }
         List<Lock> locksOnTransCopy = new LinkedList<>();
         locksOnTransCopy.addAll(locksOnTrans);
         if (locksOnTransCopy!= null) {
@@ -174,9 +184,9 @@ public class LockControlBoard {
      * when a page is released by write lock, notify this function to enable the lock that is in waiting list;
      * blocked locks is a LIFO queue in waiting line
      * */
-    public void enableBlockedHandle (PageId pageid) throws DbException,
+    public synchronized void enableBlockedHandle (PageId pageid) throws DbException,
     TransactionAbortedException {
-        List<Lock> blockedHandleCopy = new ArrayList<>();
+        List<Lock> blockedHandleCopy = Collections.synchronizedList(new ArrayList<>());
         blockedHandleCopy.addAll(blockedHandle);
         for (Lock l : blockedHandleCopy) {
             if (l.getPageid().equals(pageid)) {
