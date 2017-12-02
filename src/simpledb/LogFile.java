@@ -464,12 +464,68 @@ public class LogFile {
     public void rollback(TransactionId tid)
         throws NoSuchElementException, IOException {
         synchronized (Database.getBufferPool()) {
-            synchronized(this) {
+            synchronized (this) {
                 preAppend();
                 // some code goes here
+                // my implementation:
+                // maintain a list of pages that need to roll back, search from the start point and scan the log file
+                // found every page, if it is already searched before, ignore, other wise find the pre-image page, store
+                // in the maintained pre-imaged page list, and discard it fromt he bufferpool.
+                //
+                rollback(tid.getId());
             }
         }
     }
+
+    void rollback(long tid) throws NoSuchElementException, IOException {
+        List<PageId> discardedPages = new ArrayList<>();
+
+        if (tidToFirstLogRecord.get(tid) != null) {
+            long searchedOffset = tidToFirstLogRecord.get(tid);
+            try {
+                raf.seek(searchedOffset);
+                while (true) {
+                    int type = raf.readInt();
+                    long seekingTidSeq = raf.readLong();
+                    if (type == BEGIN_RECORD) {
+                        if (seekingTidSeq == tid) {
+                            System.out.println("begin log");
+                        }
+                        raf.readLong();
+                        //searchedOffset += LONG_SIZE;
+                    } else if (type == UPDATE_RECORD) {
+                        Page beforeImage = readPageData(raf);
+                        Page afterImage = readPageData(raf);
+                        raf.readLong();
+                        if (seekingTidSeq == tid) {
+                            System.out.println("Update log");
+                            if (!(discardedPages.contains(afterImage.getId()))) {
+                                DbFile hf = Database.getCatalog().getDbFile(beforeImage.getId().getTableId());
+                                hf.writePage(beforeImage);
+                                Database.getBufferPool().discardPage(beforeImage.getId());
+                                discardedPages.add(beforeImage.getId());
+                            } else {
+                                continue;
+                            }
+                        }
+                    } else if (type == ABORT_RECORD || type == COMMIT_RECORD) {
+                        System.out.println("Commit/Abort log");
+                        raf.readLong();
+                    } else {
+                        //checkpoint
+                        System.out.println("Check point log");
+                        long checkpointOffset = raf.readLong();
+                        while (checkpointOffset != raf.getFilePointer()) {
+                            checkpointOffset = raf.readLong();
+                        }
+                    }
+
+                }
+            } catch (EOFException e) {
+                return;
+            }
+        }
+            }
 
     /** Shutdown the logging system, writing out whatever state
         is necessary so that start up can happen quickly (without
@@ -494,8 +550,70 @@ public class LogFile {
             synchronized (this) {
                 recoveryUndecided = false;
                 // some code goes here
+
+                Map<Long, Long> loserTxs = new HashMap<>();
+                raf.seek(0);
+                long checkPointStartOffset = raf.readLong();
+
+                // check for active transactions
+                if (checkPointStartOffset != -1) {
+                    raf.seek(checkPointStartOffset);
+                    int num = raf.readInt();
+                    for (int i = 0; i < num; i += 1) {
+                        long txIdLog = raf.readLong();
+                        long txFstRcord = raf.readLong();
+                        tidToFirstLogRecord.put(txIdLog, txFstRcord);
+                    }
+                    raf.readLong();
+                    // if CP contains the transanction and TID-LOGRECORD does not, then it is a winner transaction.
+                    // if CP doesn't contain but TID_LOGRECORD does, then it is a loser transaction.
+                    for (Map.Entry<Long, Long> tidLog : tidToFirstLogRecord.entrySet()) {
+                        if (!(loserTxs.containsKey(tidLog.getKey()))) {
+                            loserTxs.put(tidLog.getKey(), tidLog.getValue());
+                        }
+                    }
+
+                    // start re-do
+                    // now raf should be at the end of the checkpoint
+                    // restart raf at the checkpoint or the beginning
+                    if (checkPointStartOffset != -1) {
+                        raf.seek(checkPointStartOffset);
+                    } else {
+                        raf.seek(0);
+                        raf.readLong();
+                    }
+                    while (true) {
+                        try {
+                            int type = raf.readInt();
+                            long transactionIdLog = raf.readLong();
+                            if (type == BEGIN_RECORD) {
+                                // do nothing because REDO will not be recored in log
+                                tidToFirstLogRecord.put(transactionIdLog, raf.getFilePointer());
+                            } else if (type == UPDATE_RECORD) {
+                                readPageData(raf);
+                                Page afterImage = readPageData(raf);
+                                DbFile hf = Database.getCatalog().getDbFile(afterImage.getId().getTableId());
+                                hf.writePage(afterImage);
+                                Database.getBufferPool().discardPage(afterImage.getId());
+                            } else if (type == ABORT_RECORD) {
+                                rollback(transactionIdLog);
+                                tidToFirstLogRecord.remove(transactionIdLog);
+                            } else {
+                                // COMMIT_RECORD
+                                tidToFirstLogRecord.remove(transactionIdLog);
+                            }
+                            raf.readLong();
+                        } catch(EOFException e) {
+                            break;
+                        }
+                    }
+                    // finish the re-do, now un-do all loser transaction.
+                    for (Map.Entry<Long, Long> entry : tidToFirstLogRecord.entrySet()) {
+                        rollback(entry.getValue());
+                    }
+                }
             }
-         }
+        }
     }
 
     /** Print out a human readable represenation of the log */

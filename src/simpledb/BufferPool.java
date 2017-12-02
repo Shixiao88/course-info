@@ -186,9 +186,11 @@ public class BufferPool {
         if (commit) {
             for (Page p: pageList) {
                 if (p.isDirty() == tid) {
-                    DbFile f = Database.getCatalog().getDbFile(p.getId().getTableId());
-                    f.writePage(p);
-                    p.markDirty(false, tid);
+                    flushPage(p.getId());
+
+                    // use current page contents as the before-image
+                    // for the next transaction that modifies this page.
+                    p.setBeforeImage();
                 }
             }
             controlBoard.closeLock(tid);
@@ -273,7 +275,6 @@ public class BufferPool {
                 flushPage(p.getId());
             }
         }
-
     }
 
     /** Remove the specific page id from the buffer pool.
@@ -284,6 +285,13 @@ public class BufferPool {
     public synchronized void discardPage(PageId pid) {
         // some code goes here
         // only necessary for lab5
+        List<Page> pageListCp = Collections.synchronizedList(new LinkedList<>());
+        for (Page pg : pageList) {
+            if (!(pg.getId().equals(pid))) {
+                pageListCp.add(pg);
+            }
+        }
+        pageList = pageListCp;
     }
 
     /**
@@ -293,7 +301,14 @@ public class BufferPool {
     private synchronized void flushPage(PageId pid) throws IOException {
         for (Page pg : pageList) {
             if (pg.getId().equals(pid)) {
-                if (pg.isDirty() != null) {
+                TransactionId dirtier = pg.isDirty();
+                if (dirtier != null) {
+                    // append an update record to the log, with
+                    // a before-image and after-image.
+                    Database.getLogFile().logWrite(dirtier, pg.getBeforeImage(), pg);
+                    // We force the log to ensure the log record is on disk before the page is written to disk.
+                    Database.getLogFile().force();
+
                     DbFile hf = Database.getCatalog().getDbFile(pid.getTableId());
                     hf.writePage(pg);
                     pg.markDirty(false, null);
